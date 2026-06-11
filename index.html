@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ज्ञान ज्योति शिक्षण संस्थान - 3 सब्जेक्ट परीक्षा पोर्टल</title>
+    <title>ज्ञान ज्योति शिक्षण संस्थान - ऑटोमैटिक लाइव परीक्षा पोर्टल</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -126,22 +126,17 @@
             background: white;
         }
 
-        .csv-setup-box {
-            grid-column: span 2; 
-            background: #ebf8ff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid #bee3f8;
-            margin-top: 5px;
+        .status-box {
+            grid-column: span 2;
+            background: #f0fff4;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #c6f6d5;
+            color: #22543d;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
         }
-        .csv-row {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-        .csv-row:last-child { margin-bottom: 0; }
 
         .question-block {
             background: #f8fafc;
@@ -355,7 +350,7 @@
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .csv-setup-box { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
             .certificate-card { border: 8px double #b7791f; page-break-before: always; }
@@ -371,13 +366,13 @@
     <div class="rules-tag">
         📋 <b>परीक्षा के नियम एवं निर्देश:</b><br>
         1. सभी प्रश्न करने अनिवार्य हैं।<br>
-        2. प्रत्येक प्रश्न में पांचवां विकल्प (E) प्रश्न को स्किप करने के लिए दिया गया है। यदि आप उत्तर नहीं जानते, तो उसे स्किप कर सकते हैं।<br>
+        2. प्रत्येक प्रश्न का समय उसकी फ़ाइल के अनुसार परीक्षा टाइमर में ऑटो-जोड़ दिया गया है।<br>
         3. सही उत्तर मिलने पर +10 अंक दिए जाएंगे, गलत उत्तर पर -3 अंक की कटौती होगी। प्रश्न स्किप करने पर 0 अंक मिलेगा।<br>
-        4. ऑफलाइन व ऑनलाइन नक़ल रोकने हेतु सुरक्षा प्रणाली सक्रिय है। विंडो बदलने या फुलस्क्रीन से बाहर जाने पर परीक्षा रद्द हो जाएगी।
+        4. परीक्षा समाप्ति का सटीक समय और तारीख सिस्टम द्वारा ऑटो-रिकॉर्ड की जाएगी।
     </div>
     
     <div class="sticky-header" id="header-bar">
-        <div class="timer-box" id="timer-display">⏱️ शेष समय: 20:00 मिनट</div>
+        <div class="timer-box" id="timer-display">⏱️ शेष समय: गणना की जा रही है...</div>
         <div class="security-badge" id="cheat-display">🛡️ सुरक्षा स्थिति: सुरक्षित (उल्लंघन काउंट: 0/3)</div>
         <div class="progress-container">
             <div class="progress-bar" id="p-bar"></div>
@@ -404,43 +399,14 @@
             </div>
             <div class="info-group">
                 <label>परीक्षा का विषय (Select Subject):</label>
-                <select id="s-subject">
-                    <option value="1">गणित (Mathematics)</option>
-                    <option value="2">विज्ञान (Science)</option>
-                    <option value="3">हिंदी (Hindi)</option>
-                </select>
-            </div>
-            <div class="info-group">
-                <label>दिनांक (Date):</label>
-                <input type="date" id="s-date">
-            </div>
-            <div class="info-group">
-                <label>मार्गदर्शक के हस्ताक्षर इमेज अपलोड करें:</label>
-                <input type="file" id="p-sign-file" accept="image/*">
+                <select id="s-subject"></select>
             </div>
 
-            <div class="csv-setup-box">
-                <strong style="color:#2b6cb0; display:block; margin-bottom:10px; font-size:14px;">⚙️ शिक्षक सेटअप: विषय के नाम बदलें और उनकी CSV फाइल अपलोड करें:</strong>
-                
-                <div class="csv-row">
-                    <input type="text" id="subj1-name" value="गणित (Mathematics)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
-                    <input type="file" id="csv-file-1" accept=".csv" style="font-size:12px;">
-                </div>
-                
-                <div class="csv-row">
-                    <input type="text" id="subj2-name" value="विज्ञान (Science)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
-                    <input type="file" id="csv-file-2" accept=".csv" style="font-size:12px;">
-                </div>
-                
-                <div class="csv-row">
-                    <input type="text" id="subj3-name" value="हिंदी (Hindi)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
-                    <input type="file" id="csv-file-3" accept=".csv" style="font-size:12px;">
-                </div>
-            </div>
+            <div class="status-box" id="load-status">🔄 GitHub से परीक्षा फाइलें लोड की जा रही हैं, कृपया प्रतीक्षा करें...</div>
         </div>
     </div>
     
-    <button class="btn" id="start-btn" onclick="startExam()">🔐 परीक्षा शुरू करें (Start Exam)</button>
+    <button class="btn" id="start-btn" onclick="startExam()" disabled>🔐 डेटा लोड हो रहा है...</button>
     
     <div id="quiz-form" style="display:none;"></div>
     
@@ -464,7 +430,7 @@
                 <th>नाम</th>
                 <th>रोल नंबर</th>
                 <th>विषय</th>
-                <th>तारीख</th>
+                <th>परीक्षा देने का समय</th>
                 <th>प्राप्तांक</th>
                 <th>ग्रेड</th>
             </tr>
@@ -482,60 +448,105 @@
 </div>
 
 <script>
+    // 🌍 1. गिटहब कॉन्फ़िगरेशन (यहाँ अपने डायरेक्ट लिंक्स डालें)
+    const GITHUB_CONFIG = {
+        subj1: {
+            name: "गणित (Mathematics)",
+            url: "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/maths.csv"
+        },
+        subj2: {
+            name: "विज्ञान (Science)",
+            url: "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/science.csv"
+        },
+        subj3: {
+            name: "हिंदी (Hindi)",
+            url: "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/hindi.csv"
+        },
+        signatureUrl: "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/signature.png"
+    };
+
     let activeQuestions = [];
-    let timeLeft = 1200; 
+    let timeLeft = 0; 
     let timerInterval;
     let isSubmitted = false;
     let examActive = false;
     let cheatCount = 0;
-    let signImgData = ""; 
 
     let dataSubj1 = [];
     let dataSubj2 = [];
     let dataSubj3 = [];
     let selectedSubjectName = "";
 
-    document.getElementById('s-date').valueAsDate = new Date();
-    syncDropdown();
     loadHistory();
 
-    function syncDropdown() {
-        const s1 = document.getElementById('subj1-name').value || "विषय 1";
-        const s2 = document.getElementById('subj2-name').value || "विषय 2";
-        const s3 = document.getElementById('subj3-name').value || "विषय 3";
-        
-        const select = document.getElementById('s-subject');
-        select.options[0].text = s1;
-        select.options[1].text = s2;
-        select.options[2].text = s3;
-    }
-
-    document.getElementById('csv-file-1').addEventListener('change', e => { readCSVFile(e.target.files[0], 1); });
-    document.getElementById('csv-file-2').addEventListener('change', e => { readCSVFile(e.target.files[0], 2); });
-    document.getElementById('csv-file-3').addEventListener('change', e => { readCSVFile(e.target.files[0], 3); });
-
-    function readCSVFile(file, slotNum) {
-        if(!file) return;
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let parsed = parseCSVText(e.target.result);
-            if(slotNum === 1) dataSubj1 = parsed;
-            if(slotNum === 2) dataSubj2 = parsed;
-            if(slotNum === 3) dataSubj3 = parsed;
-        };
-        // 🌟 यहाँ 'UTF-8' फ़ोर्स किया गया है ताकि हिंदी फ़ॉन्ट न टूटे
-        reader.readAsText(file, 'UTF-8');
-    }
-
-    document.getElementById('p-sign-file').addEventListener('change', function(e) {
-        let file = e.target.files[0];
-        if(file) {
-            let reader = new FileReader();
-            reader.onload = function(event) { signImgData = event.target.result; };
-            reader.readAsDataURL(file);
-        }
+    // 🚀 पेज लोड होते ही गिटहब से डेटा सिंक करना
+    window.addEventListener('DOMContentLoaded', () => {
+        setupDropdownNames();
+        loadAllDataFromGitHub();
     });
 
+    function setupDropdownNames() {
+        const select = document.getElementById('s-subject');
+        select.innerHTML = `
+            <option value="1">${GITHUB_CONFIG.subj1.name}</option>
+            <option value="2">${GITHUB_CONFIG.subj2.name}</option>
+            <option value="3">${GITHUB_CONFIG.subj3.name}</option>
+        `;
+    }
+
+    async function loadAllDataFromGitHub() {
+        try {
+            let res1 = await fetch(GITHUB_CONFIG.subj1.url);
+            let text1 = await res1.text();
+            dataSubj1 = parseCSVText(text1);
+
+            let res2 = await fetch(GITHUB_CONFIG.subj2.url);
+            let text2 = await res2.text();
+            dataSubj2 = parseCSVText(text2);
+
+            let res3 = await fetch(GITHUB_CONFIG.subj3.url);
+            let text3 = await res3.text();
+            dataSubj3 = parseCSVText(text3);
+
+            document.getElementById('load-status').style.background = "#f0fff4";
+            document.getElementById('load-status').style.color = "#22543d";
+            document.getElementById('load-status').innerHTML = "✅ सभी विषय एवं मार्गदर्शक हस्ताक्षर GitHub से लोड हो चुके हैं!";
+            
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🔐 परीक्षा शुरू करें (Start Exam)";
+        } catch (error) {
+            document.getElementById('load-status').style.background = "#fff5f5";
+            document.getElementById('load-status').style.color = "#9b2c2c";
+            document.getElementById('load-status').innerHTML = "❌ त्रुटि: GitHub से फ़ाइल लोड विफल! कोड में URL चेक करें।";
+            console.error(error);
+        }
+    }
+
+    function parseCSVText(text) {
+        let lines = text.split('\n');
+        let list = [];
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            let parts = line.split(',');
+            if (parts.length >= 6) {
+                let questionTime = 60; 
+                if (parts[6] && !isNaN(parts[6].trim())) {
+                    questionTime = parseInt(parts[6].trim());
+                }
+                list.push({
+                    question: parts[0].trim(),
+                    options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
+                    answer: parts[5].trim(),
+                    time: questionTime
+                });
+            }
+        }
+        return list;
+    }
+
+    // 🔒 एंटी-चीट सुरक्षा प्रणाली
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
@@ -558,7 +569,7 @@
 
     window.addEventListener('blur', () => {
         if (examActive && !isSubmitted) {
-            triggerSecurityViolation("लोकल ऑफलाइन फाइल खोलने का प्रयास!");
+            triggerSecurityViolation("परीक्षा के दौरान अन्य विंडो पर जाने का प्रयास!");
         }
     });
 
@@ -590,24 +601,6 @@
         return array;
     }
 
-    function parseCSVText(text) {
-        let lines = text.split('\n');
-        let list = [];
-        for (let i = 1; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-            let parts = line.split(',');
-            if (parts.length >= 6) {
-                list.push({
-                    question: parts[0].trim(),
-                    options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
-                    answer: parts[5].trim()
-                });
-            }
-        }
-        return list;
-    }
-
     function startExam() {
         const name = document.getElementById('s-name').value.trim();
         const roll = document.getElementById('s-roll').value.trim();
@@ -619,30 +612,26 @@
         }
 
         let selectedSourceArray = [];
-        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = document.getElementById('subj1-name').value; }
-        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = document.getElementById('subj2-name').value; }
-        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = document.getElementById('subj3-name').value; }
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = GITHUB_CONFIG.subj1.name; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = GITHUB_CONFIG.subj2.name; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = GITHUB_CONFIG.subj3.name; }
 
         if (selectedSourceArray.length === 0) {
-            alert(`⚠️ इस विषय (${selectedSubjectName}) की CSV फ़ाइल शिक्षक सेटअप में अपलोड नहीं की गई है!`);
+            alert(`⚠️ इस विषय का डेटा अभी लोड नहीं हो पाया है!`);
             return;
         }
 
         activeQuestions = shuffleQuestions([...selectedSourceArray]);
+
+        let totalExamSeconds = 0;
+        activeQuestions.forEach(q => { totalExamSeconds += q.time; });
+        timeLeft = totalExamSeconds;
 
         document.documentElement.requestFullscreen().then(() => {
             document.getElementById('s-name').readOnly = true;
             document.getElementById('s-roll').readOnly = true;
             document.getElementById('s-subject').disabled = true;
             document.getElementById('s-gender').disabled = true;
-            document.getElementById('p-sign-file').disabled = true;
-            
-            document.getElementById('subj1-name').disabled = true;
-            document.getElementById('subj2-name').disabled = true;
-            document.getElementById('subj3-name').disabled = true;
-            document.getElementById('csv-file-1').disabled = true;
-            document.getElementById('csv-file-2').disabled = true;
-            document.getElementById('csv-file-3').disabled = true;
 
             document.getElementById('start-btn').style.display = "none";
             document.getElementById('header-bar').style.display = "block";
@@ -686,7 +675,7 @@
             `;
 
             div.innerHTML = `
-                <span class="marks-tag">सही +10 | गलत -3 | स्किप 0</span>
+                <span class="marks-tag">समय: ${item.time}s | सही +10 | गलत -3</span>
                 <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
                 <div class="options-container">
                     ${optionsHtml}
@@ -728,6 +717,19 @@
         examActive = false;
 
         if (document.fullscreenElement) { document.exitFullscreen(); }
+
+        // ⏱️ यहाँ वर्तमान लाइव समय और दिनांक को ऑटो-कैप्चर किया जा रहा है
+        let now = new Date();
+        let day = String(now.getDate()).padStart(2, '0');
+        let month = String(now.getMonth() + 1).padStart(2, '0');
+        let year = now.getFullYear();
+        let hours = now.getHours();
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        let hoursStr = String(hours).padStart(2, '0');
+        let currentLiveExamDateTime = `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
 
         let totalCorrect = 0;
         let totalWrong = 0;
@@ -782,6 +784,7 @@
             <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             <div style="text-align: center; margin: 15px 0;">
+                <span style="font-size: 14px; color:#718096;">⏱️ परीक्षा समाप्ति का समय: <b>${currentLiveExamDateTime}</b></span><br>
                 <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong} | स्किप: ${totalSkipped}</span><br>
                 <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
             </div>
@@ -796,17 +799,13 @@
         
         const nameInput = document.getElementById('s-name').value;
         const rollInput = document.getElementById('s-roll').value;
-        const dateInput = document.getElementById('s-date').value;
         const genderInput = document.getElementById('s-gender').value;
 
         if (isPassed) {
             const certDiv = document.getElementById('certificate-box');
             certDiv.style.display = "block";
             
-            let signRenderHtml = `<div style="font-family: 'Brush Script MT', cursive; font-size: 20px; color: #2b6cb0; font-weight: bold;">विनोद कुमार सहारण</div>`;
-            if (signImgData !== "") {
-                signRenderHtml = `<img src="${signImgData}" class="uploaded-sign-img" alt="Signature">`;
-            }
+            let signRenderHtml = `<img src="${GITHUB_CONFIG.signatureUrl}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
 
             certDiv.innerHTML = `
                 <div class="certificate-card">
@@ -816,11 +815,11 @@
                     <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
                     <div class="cert-name">${nameInput}</div>
                     <p style="font-size:16px; width:85%; margin: 10px auto; line-height:1.6;">
-                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक <b>${dateInput}</b> को आयोजित ऑनलाइन मुख्य परीक्षा में 
+                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक व समय <b>${currentLiveExamDateTime}</b> को आयोजित ऑनलाइन मुख्य परीक्षा में 
                         विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
                     </p>
                     <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
-                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि:<br><b>${dateInput}</b></div>
+                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि व समय:<br><b>${currentLiveExamDateTime}</b></div>
                         <div style="text-align: center; min-width: 180px;">
                             ${signRenderHtml}
                             <div style="font-size: 9px; color: #38a169; font-weight: bold; margin-bottom: 3px;">✓ DIGITALLY VERIFIED</div>
@@ -837,108 +836,12 @@
         document.getElementById('print-btn').style.display = "block";
         
         let grade = finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
-        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, finalMarks, grade, detailedQuestionLog);
+        saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function saveToHistory(name, roll, subject, date, marks, grade, details) {
-        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
+    function saveToHistory(name, roll, subject, datetime, marks, grade, details) {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
         let id = Date.now();
-        history.push({ id, name, roll, subject, date, marks, grade, details });
-        localStorage.setItem('gjEdu3SubjHistory', JSON.stringify(history));
-        loadHistory();
-    }
-
-    function loadHistory() {
-        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
-        const tbody = document.getElementById('history-rows');
-        tbody.innerHTML = "";
-        if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई रिकॉर्ड मौजूद नहीं है।</td></tr>`;
-            return;
-        }
-        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
-        let rankMap = {};
-        let currentRank = 1;
-        sortedHistory.forEach((item, index) => {
-            if (index > 0 && item.marks < sortedHistory[index - 1].marks) { currentRank = index + 1; }
-            rankMap[item.id] = currentRank;
-        });
-        for (let i = history.length - 1; i >= 0; i--) {
-            let item = history[i];
-            let myRank = rankMap[item.id];
-            let rankBadge = myRank === 1 ? "🥇 1" : myRank === 2 ? "🥈 2" : myRank === 3 ? "🥉 3" : myRank;
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${rankBadge}</b></td>
-                    <td>${item.name}</td>
-                    <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
-                    <td><b>${item.subject}</b></td>
-                    <td>${item.date}</td>
-                    <td><b>${item.marks}</b></td>
-                    <td><span style="font-weight:bold; color:#2b6cb0;">${item.grade}</span></td>
-                </tr>
-            `;
-        }
-    }
-
-    function viewStudentDetails(index) {
-        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
-        let student = history[index];
-        if (!student) return;
-        let modal = document.getElementById('details-modal');
-        let content = document.getElementById('modal-content');
-        let detailRows = "";
-        student.details.forEach(d => {
-            detailRows += `
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding:8px;"><b>Q-${d.qNum}</b></td>
-                    <td style="text-align:left; font-size:13px; padding:8px;">${d.question}</td>
-                    <td style="color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
-                    <td style="color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
-                    <td style="padding:8px;">${d.status}</td>
-                </tr>
-            `;
-        });
-        content.innerHTML = `
-            <div style="margin: 10px 0; font-size: 14px; line-height: 1.6; background:#f7fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
-                👤 <b>परीक्षार्थी:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
-                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल प्राप्त अंक:</b> ${student.marks}
-            </div>
-            <table class="summary-table" style="margin-top: 15px; width:100%;">
-                <thead><tr style="background:#edf2f7;"><th>क्र.सं.</th><th>प्रश्न</th><th>छात्र उत्तर</th><th>सही उत्तर</th><th>स्थिति</th></tr></thead>
-                <tbody>${detailRows}</tbody>
-            </table>
-        `;
-        modal.style.display = "flex";
-    }
-
-    function closeModal() { document.getElementById('details-modal').style.display = "none"; }
-
-    function downloadExcel() {
-        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
-        if (history.length === 0) { alert("डेटा उपलब्ध नहीं है!"); return; }
-        let csvContent = "Rank,Student Name,Roll Number,Subject,Date,Marks Obtained,Grade\n";
-        history.slice().reverse().forEach((item, index) => {
-            csvContent += `${index+1},${item.name},${item.roll},${item.subject},${item.date},${item.marks},${item.grade}\n`;
-        });
-        let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        let url = URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "Gyan_Jyoti_3Subj_Results.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function clearHistory() {
-        if(confirm("क्या आप सारा इतिहास डिलीट करना चाहते हैं?")) {
-            localStorage.removeItem('gjEdu3SubjHistory');
-            loadHistory();
-        }
-    }
-</script>
-
-</body>
-</html>
+        history.push({ id, name, roll, subject, date: datetime, marks, grade, details });
+        localStorage
