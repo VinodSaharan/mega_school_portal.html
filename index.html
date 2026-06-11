@@ -235,6 +235,15 @@
             background: #edf2f7;
             color: #4a5568;
         }
+        .roll-link {
+            color: #3182ce;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .roll-link:hover {
+            color: #2b6cb0;
+        }
         .clear-btn {
             background: #e53e3e;
             color: white;
@@ -246,11 +255,48 @@
             float: right;
         }
 
+        /* विस्तृत विवरण पॉप-अप (Modal) स्टाइल */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #718096;
+        }
+        .close-modal:hover {
+            color: #2d3748;
+        }
+
         /* प्रिंट सेटिंग्स */
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .clear-btn, select, #quiz-form { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .clear-btn, select, #quiz-form, .modal-overlay { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
             .summary-table { background: white; }
@@ -312,7 +358,7 @@
         <thead>
             <tr>
                 <th>नाम</th>
-                <th>रोल नंबर</th>
+                <th>रोल नंबर (विवरण लिंक)</th>
                 <th>विषय</th>
                 <th>तारीख</th>
                 <th>प्राप्तांक</th>
@@ -321,6 +367,14 @@
         </thead>
         <tbody id="history-rows"></tbody>
     </table>
+</div>
+
+<div class="modal-overlay" id="details-modal">
+    <div class="modal-box">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र परीक्षा का विस्तृत विवरण</h3>
+        <div id="modal-content"></div>
+    </div>
 </div>
 
 <script>
@@ -357,7 +411,7 @@
             {"question": "विद्युत धारा (Electric Current) को मापने का मात्रक क्या है?", "options": ["वोल्ट", "वाट", "एम्पियर", "ओम"], "answer": "एम्पियर"},
             {"question": "पौधों में पत्तियों का हरा रंग निम्नलिखित में से किसके कारण होता है?", "options": ["क्लोरोफिल", "हीमोग्लोबिन", "कैरोटीन", "जाइलम"], "answer": "क्लोरोफिल"},
             {"question": "हमारे सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", "options": ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], "answer": "बृहस्पति"},
-            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अल्बर्ट आइंइन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
+            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अल्बर्ट आइंस्टीन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
             {"question": "विटामिन सी (Vitamin C) की कमी से कौन सा रोग होता है?", "options": ["रिकेट्स", "रतौंधी", "बेरी-बेरी", "स्कर्वी"], "answer": "स्कर्वी"},
             {"question": "वायुमंडल में सबसे अधिक मात्रा (78%) में पाई जाने वाली गैस कौन सी है?", "options": ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "आर्गन"], "answer": "नाइट्रोजन"},
             {"question": "पानी (H₂O) में हाइड्रोजन और ऑक्सीजन के परमाणुओं का अनुपात क्या होता है?", "options": ["2:1", "1:2", "8:1", "1:8"], "answer": "2:1"}
@@ -463,14 +517,17 @@
 
         let correctAnswersCount = 0;
         let tableRowsHtml = ""; 
+        let detailedQuestionLog = []; // प्रत्येक प्रश्न का विस्तृत लॉग सेव करने के लिए array
 
         activeQuestions.forEach((item, index) => {
             const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
             
             let statusText = "";
+            let isCorrect = false;
             if (selectedOpt && selectedOpt.value === item.answer) {
                 correctAnswersCount++;
                 statusText = "<span class='status-correct'>✅ सही</span>";
+                isCorrect = true;
             } else {
                 statusText = "<span class='status-wrong'>❌ गलत</span>";
             }
@@ -481,6 +538,13 @@
                     <td>${statusText}</td>
                 </tr>
             `;
+
+            // हर एक प्रश्न की डिटेल लॉग में जोड़ें
+            detailedQuestionLog.push({
+                qNum: index + 1,
+                question: item.question,
+                status: statusText
+            });
         });
 
         const totalMarks = correctAnswersCount * 10;
@@ -532,13 +596,14 @@
         else if (totalMarks >= 50) grade = "C";
         else if (totalMarks >= 40) grade = "D";
 
-        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, totalMarks, grade);
+        // विस्तृत लॉग के साथ इतिहास सुरक्षित करें
+        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, totalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function saveToHistory(name, roll, subject, date, marks, grade) {
+    function saveToHistory(name, roll, subject, date, marks, grade, details) {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
-        history.push({ name, roll, subject, date, marks, grade });
+        history.push({ name, roll, subject, date, marks, grade, details });
         localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
         loadHistory();
     }
@@ -553,19 +618,72 @@
             return;
         }
 
-        history.slice().reverse().forEach(item => {
+        // ताज़ा रिकॉर्ड ऊपर दिखाने के लिए उल्टे क्रम में लूप चलाएं
+        for (let i = history.length - 1; i >= 0; i--) {
+            let item = history[i];
             let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
+            
             tbody.innerHTML += `
                 <tr>
                     <td>${item.name}</td>
-                    <td>${item.roll}</td>
+                    <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
                     <td><b>${item.subject}</b></td>
                     <td>${item.date}</td>
                     <td><b>${item.marks} / 100</b></td>
                     <td><span style="font-weight:bold; ${colorStyle}">${item.grade}</span></td>
                 </tr>
             `;
+        }
+    }
+
+    // 🔍 रोल नंबर पर क्लिक करने पर विस्तृत विवरण दिखाने का फंक्शन
+    function viewStudentDetails(index) {
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        let student = history[index];
+        
+        if (!student || !student.details) {
+            alert("⚠️ इस रिकॉर्ड का विस्तृत विवरण उपलब्ध नहीं है (शायद यह पुराना डेटा है)। कृपया नया टेस्ट सबमिट करें।");
+            return;
+        }
+
+        let modal = document.getElementById('details-modal');
+        let content = document.getElementById('modal-content');
+        
+        let detailRows = "";
+        student.details.forEach(d => {
+            detailRows += `
+                <tr>
+                    <td style="width:15%"><b>प्रश्न ${d.qNum}</b></td>
+                    <td style="text-align:left; font-size:14px;">${d.question}</td>
+                    <td style="width:20%">${d.status}</td>
+                </tr>
+            `;
         });
+
+        content.innerHTML = `
+            <div style="margin: 12px 0; font-size: 15px; line-height: 1.6; background:#f7fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+                👤 <b>नाम:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
+                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल अंक:</b> ${student.marks}/100 (${student.grade})
+            </div>
+            <table class="summary-table" style="margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th>क्र.सं.</th>
+                        <th>पूछा गया प्रश्न</th>
+                        <th>स्थिति</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${detailRows}
+                </tbody>
+            </table>
+        `;
+        
+        modal.style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById('details-modal').style.display = "none";
     }
 
     function clearHistory() {
