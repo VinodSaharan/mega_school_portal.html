@@ -89,6 +89,13 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+        .progress-text-display {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 6px;
+            color: #2b6cb0;
+        }
 
         .student-info {
             background: #f7fafc;
@@ -397,6 +404,7 @@
         <div class="progress-container">
             <div class="progress-bar" id="p-bar"></div>
         </div>
+        <div class="progress-text-display" id="progress-count-text">हल किए गए प्रश्न: 0 / 0</div>
     </div>
     
     <div class="student-info" id="info-card">
@@ -446,7 +454,6 @@
     </div>
 </div>
 
-<!-- डैशबोर्ड पैनल -->
 <div class="dashboard-container">
     <div class="action-bar">
         <div style="font-size: 14px; font-weight: bold; color:#2b6cb0; margin-right: auto;">📂 डायरेक्ट ऑटो-लोड सक्रिय (maths.csv, science.csv, hindi.csv)</div>
@@ -490,7 +497,6 @@
     let cheatCount = 0;
     let selectedSubjectName = "";
 
-    // डिफ़ॉल्ट/खाली एरे (CSV से ऑटो-लोड होंगे)
     let dataSubj1 = [];
     let dataSubj2 = [];
     let dataSubj3 = [];
@@ -500,7 +506,6 @@
         return newHistory ? JSON.parse(newHistory) : [];
     }
 
-    // 🔄 CSV टेक्स्ट पार्स करने का हेल्पर फंक्शन
     function parseCSVText(text) {
         let lines = text.split(/\r?\n/);
         let parsed = [];
@@ -525,34 +530,29 @@
         return parsed;
     }
 
-    // 📥 सीधे फोल्डर से फाइलें उठाने का ऑटोमैटिक लॉजिक (Auto-Fetch)
     async function loadAllCSVFilesDirectly() {
         const statusBox = document.getElementById('load-status');
         statusBox.innerHTML = "🔄 विषय-वार CSV फाइलें सीधे फोल्डर से लोड की जा रही हैं...";
         
         try {
-            // 1. लोड करें maths.csv
             let resMaths = await fetch('maths.csv');
             if(resMaths.ok) {
                 let text = await resMaths.text();
                 dataSubj1 = parseCSVText(text);
             }
 
-            // 2. लोड करें science.csv
             let resScience = await fetch('science.csv');
             if(resScience.ok) {
                 let text = await resScience.text();
                 dataSubj2 = parseCSVText(text);
             }
 
-            // 3. लोड करें hindi.csv
             let resHindi = await fetch('hindi.csv');
             if(resHindi.ok) {
                 let text = await resHindi.text();
                 dataSubj3 = parseCSVText(text);
             }
 
-            // स्थिति अपडेट करें
             statusBox.style.background = "#f0fff4";
             statusBox.style.color = "#22543d";
             statusBox.style.border = "1px solid #c6f6d5";
@@ -573,7 +573,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         setupDropdownNames();
-        loadAllCSVFilesDirectly(); // पेज खुलते ही डायरेक्ट लोड रन होगा
+        loadAllCSVFilesDirectly(); 
         loadHistory();
     });
 
@@ -586,7 +586,6 @@
         `;
     }
 
-    // एंटी-चीट कोड
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
@@ -616,7 +615,7 @@
 
     function showCustomToast(msg) {
         const toast = document.getElementById('toast-alert');
-        toast.innerHTML = `⚠️ <b>सुरक्षा चेतावनी:</b> ${msg}`;
+        toast.innerHTML = `⚠️ <b>सूचना/चेतावनी:</b> ${msg}`;
         toast.style.display = "block";
         setTimeout(() => { toast.style.display = "none"; }, 5000);
     }
@@ -624,7 +623,7 @@
     function triggerSecurityViolation(reason) {
         if (isSubmitted) return;
         cheatCount++;
-        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/5)`;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/5)`;
         
         if (cheatCount >= 5) {
             clearInterval(timerInterval);
@@ -639,7 +638,7 @@
     function showSecurityLockScreen() {
         if (cheatCount >= 5 || isSubmitted) return;
         cheatCount++;
-        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/5)`;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/5)`;
         
         if (cheatCount >= 5) { checkAnswers(true); return; }
 
@@ -692,7 +691,7 @@
         if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = "हिंदी (Hindi)"; }
 
         if(selectedSourceArray.length === 0) {
-            alert(`❌ इस विषय की CSV फाइल फोल्डर में नहीं मिली या खाली है! कृपया जांचें कि क्या फोल्डर में सही नाम से फाइल मौजूद है।`);
+            alert(`❌ इस विषय की CSV फाइल फोल्डर में नहीं मिली या खाली है!`);
             return;
         }
 
@@ -753,6 +752,7 @@
             `;
             quizForm.appendChild(div);
         });
+        updateProgress(); // प्रारंभ में 0/10 सेट करने के लिए
     }
 
     function updateProgress() {
@@ -762,6 +762,7 @@
         });
         const percentage = (filledCount / activeQuestions.length) * 100;
         document.getElementById('p-bar').style.width = percentage + "%";
+        document.getElementById('progress-count-text').innerText = `हल किए गए प्रश्न: ${filledCount} / ${activeQuestions.length}`;
     }
 
     function startTimer() {
@@ -787,7 +788,8 @@
                 if (!document.querySelector(`input[name="q-${index}"]:checked`)) { unansweredQuestions.push(index + 1); }
             });
             if (unansweredQuestions.length > 0) {
-                alert(`⚠️ कृपया या तो सही उत्तर चुनें या 'E) प्रश्न स्किप करें' विकल्प को चुनें।`);
+                // यहाँ alert() की जगह कस्टम टोस्ट अलर्ट का उपयोग किया है ताकि फुलस्क्रीन न टूटे और चीट काउंट न बढ़े
+                showCustomToast(`कृपया सभी प्रश्नों के उत्तर दें या 'E) प्रश्न स्किप करें' विकल्प चुनें। (अपूर्ण प्रश्न संख्या: ${unansweredQuestions.join(', ')})`);
                 return;
             }
         }
