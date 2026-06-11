@@ -106,12 +106,6 @@
             font-size: 14px;
             background: white;
         }
-        .fixed-school {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            cursor: not-allowed;
-            font-weight: bold;
-        }
 
         /* प्रश्न ब्लॉक */
         .question-block {
@@ -193,7 +187,7 @@
         #print-btn { background: #38a169; display: none; }
         #print-btn:hover { background: #2f855a; }
         
-        /* रिजल्ट कार्ड डिज़ाइन (बिना 'Fail' शब्द के) */
+        /* रिजल्ट कार्ड डिज़ाइन */
         .result {
             margin-top: 25px;
             font-size: 20px;
@@ -275,6 +269,7 @@
     <h1>राजकीय उच्च माध्यमिक विद्यालय, राजस्थान</h1>
     <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल</div>
     
+    <!-- प्रोग्रेस और टाइमर बार -->
     <div class="sticky-header" id="header-bar">
         <div class="timer-box" id="timer-display">⏱️ शेष समय: 20:00 मिनट</div>
         <div class="progress-container">
@@ -282,6 +277,7 @@
         </div>
     </div>
     
+    <!-- छात्र विवरण फॉर्म -->
     <div class="student-info" id="info-card">
         <h3>📋 परीक्षा फॉर्म (Exam Registration)</h3>
         <div class="info-grid">
@@ -308,15 +304,19 @@
         </div>
     </div>
     
+    <!-- परीक्षा शुरू करने का बटन -->
     <button class="btn" id="start-btn" onclick="startExam()">🔐 परीक्षा शुरू करें (Start Exam)</button>
     
+    <!-- प्रश्नोत्तरी फॉर्म -->
     <div id="quiz-form" style="display:none;"></div>
     
+    <!-- सबमिट और प्रिंट बटन्स -->
     <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
     <div id="final-result" class="result" style="display:none;"></div>
     <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट कार्ड प्रिंट करें</button>
 </div>
 
+<!-- टीचर डैशबोर्ड -->
 <div class="dashboard-container">
     <button class="clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
     <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम)</h3>
@@ -336,7 +336,7 @@
 </div>
 
 <script>
-    // 📦 इनबिल्ट प्रश्न बैंक (No external CSV needed!)
+    // 📦 इनबिल्ट प्रश्न बैंक
     const masterQuizData = {
         "math": [
             {"question": "5 + 7 × 2 का मान क्या होगा?", "options": ["24", "19", "14", "20"], "answer": "19"},
@@ -363,13 +363,13 @@
             {"question": "'रात' शब्द का तत्सम रूप क्या होगा?", "options": ["रात्रि", "निशा", "अंधकार", "सांझ"], "answer": "रात्रि"}
         ],
         "science": [
-            {"question": "मानव आँख की रेटिना पर बनने वाला प्रतिबिंब (Image) कैसा होता है?", "options": ["वास्तविक और उल्टा", "आभासी and सीधा", "वास्तविक और सीधा", "आभासी और उल्टा"], "answer": "वास्तविक और उल्टा"},
+            {"question": "मानव आँख की रेटिना पर बनने वाला प्रतिबिंब (Image) कैसा होता है?", "options": ["वास्तविक और उल्टा", "आभासी और सीधा", "वास्तविक और सीधा", "आभासी और उल्टा"], "answer": "वास्तविक और उल्टा"},
             {"question": "शुद्ध जल (Pure Water) का pH मान कितना होता है?", "options": ["5", "6", "7", "8"], "answer": "7"},
             {"question": "मानव शरीर की सबसे लंबी या बड़ी हड्डी कौन सी है?", "options": ["स्टेप्स", "फीमर (जांघ की हड्डी)", "रीढ़ की हड्डी", "हाथ की हड्डी"], "answer": "फीमर (जांघ की हड्डी)"},
             {"question": "विद्युत धारा (Electric Current) को मापने का मात्रक क्या है?", "options": ["वोल्ट", "वाट", "एम्पियर", "ओम"], "answer": "एम्पियर"},
             {"question": "पौधों में पत्तियों का हरा रंग निम्नलिखित में से किसके कारण होता है?", "options": ["क्लोरोफिल", "हीमोग्लोबिन", "कैरोटीन", "जाइलम"], "answer": "क्लोरोफिल"},
             {"question": "हमारे सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", "options": ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], "answer": "बृहस्पति"},
-            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अअल्बर्ट आइंस्टीन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
+            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अल्बर्ट आइंस्टीन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
             {"question": "विटामिन सी (Vitamin C) की कमी से कौन सा रोग होता है?", "options": ["रिकेट्स", "रतौंधी", "बेरी-बेरी", "स्कर्वी"], "answer": "स्कर्वी"},
             {"question": "वायुमंडल में सबसे अधिक मात्रा (78%) में पाई जाने वाली गैस कौन सी है?", "options": ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "आर्गन"], "answer": "नाइट्रोजन"},
             {"question": "पानी (H₂O) में हाइड्रोजन और ऑक्सीजन के परमाणुओं का अनुपात क्या होता है?", "options": ["2:1", "1:2", "8:1", "1:8"], "answer": "2:1"}
@@ -465,7 +465,7 @@
                 let secs = timeLeft % 60;
                 document.getElementById('timer-display').innerHTML = `⏱️ शेष समय: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} मिनट`;
             }
-        }}, 1000);
+        }, 1000);
     }
 
     function checkAnswers(isAutoSubmit) {
@@ -502,7 +502,6 @@
 
         const totalMarks = correctAnswersCount * 10;
         
-        // 🎖️ सुरक्षित एडवांस ग्रेडिंग स्केल (No 'Fail' Word)
         let grade = "E";
         let remarks = "अधिक सुधार की आवश्यकता है (Need more improvement) 📑";
         let isTopGrade = false;
@@ -523,7 +522,7 @@
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             परीक्षा विषय: <b>${selectedSubjectName}</b><br>
             कुल प्राप्तांक: <span style="font-size:24px;">${totalMarks} / 100 अंक</span><br>
-            परीक्षा ग्रेड: <span class="${{badgeClass}}">${grade}</span><br>
+            परीक्षा ग्रेड: <span class="${badgeClass}">${grade}</span><br>
             टिप्पणी: <b>${remarks}</b><br>
             <small style="font-size:14px; font-weight:normal;">(विवरण: कुल 10 में से ${correctAnswersCount} प्रश्न सही हल किए)</small>
         `;
@@ -559,7 +558,8 @@
             return;
         }
 
-        history.reverse().forEach(item => {
+        // रिकॉर्ड को नए से पुराने क्रम में दिखाने के लिए स्लाइस करके रिवर्स करेंगे
+        history.slice().reverse().forEach(item => {
             let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
             tbody.innerHTML += `
                 <tr>
