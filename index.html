@@ -318,40 +318,44 @@
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
+            display: none; align-items: center; justify-content: center;
             z-index: 1000;
         }
         .modal-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 700px;
-            width: 95%;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
+            background: white; padding: 25px; border-radius: 12px;
+            max-width: 700px; width: 95%; max-height: 85vh;
+            overflow-y: auto; position: relative;
         }
         .close-modal {
-            position: absolute;
-            top: 12px;
-            right: 18px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #718096;
+            position: absolute; top: 12px; right: 18px;
+            font-size: 24px; font-weight: bold; cursor: pointer; color: #718096;
         }
+
+        /* 🚨 नई सुरक्षा लॉक स्क्रीन स्टाइल */
+        .security-lock-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.98); color: white;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 99999; text-align: center; padding: 20px;
+        }
+        .security-lock-box {
+            background: #1a202c; border: 3px solid #e53e3e;
+            padding: 40px; border-radius: 16px; max-width: 500px; width: 90%;
+            box-shadow: 0 10px 40px rgba(229, 62, 62, 0.3);
+        }
+        .lock-btn {
+            background: #e53e3e; color: white; border: none; padding: 12px 30px;
+            font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px;
+            transition: background 0.2s;
+        }
+        .lock-btn:hover { background: #c53030; }
 
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box, .security-lock-overlay { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
             .certificate-card { border: 8px double #b7791f; page-break-before: always; }
@@ -365,11 +369,10 @@
     <div class="subtitle">📍 सूरतगढ़, श्रीगंगानगर, राजस्थान</div>
     
     <div class="rules-tag">
-        📋 <b>परीक्षा के नियम एवं निर्देश:</b><br>
-        1. सभी प्रश्न करने अनिवार्य हैं।<br>
-        2. प्रत्येक प्रश्न का समय उसकी फ़ाइल के अनुसार परीक्षा टाइमर में ऑटो-जोड़ दिया गया है।<br>
-        3. सही उत्तर मिलने पर +10 अंक दिए जाएंगे, गलत उत्तर पर -3 अंक की कटौती होगी। प्रश्न स्किप करने पर 0 अंक मिलेगा।<br>
-        4. परीक्षा समाप्ति का सटीक समय और तारीख सिस्टम द्वारा ऑटो-रिकॉर्ड की जाएगी।
+        📋 <b>कड़े सुरक्षा नियम एवं निर्देश:</b><br>
+        1. सभी प्रश्न करने अनिवार्य हैं। हर विषय में से <b>सटीक 10 प्रश्न</b> रैंडम पूछे जाएंगे।<br>
+        2. किसी भी प्रश्न को खाली नहीं छोड़ा जा सकता। यदि उत्तर नहीं पता, तो <b>'E) प्रश्न स्किप करें'</b> विकल्प अवश्य चुनें।<br>
+        3. <b>सुरक्षा चेतावनियाँ:</b> परीक्षा के दौरान टैब बदलना, विंडो छोटा करना या फुलस्क्रीन से बाहर जाना सख्त मना है। <b>3 बार उल्लंघन करने पर या फुलस्क्रीन न लौटने पर पेपर तत्काल लॉक हो जाएगा।</b>
     </div>
     
     <div class="sticky-header" id="header-bar">
@@ -403,7 +406,7 @@
                 <select id="s-subject"></select>
             </div>
 
-            <div class="status-box" id="load-status">🔄 GitHub से परीक्षा फाइलें लोड की जा रही हैं, कृपया प्रतीक्षा करें...</div>
+            <div class="status-box" id="load-status">🔄 सिस्टम डेटा लोड कर रहा है...</div>
         </div>
     </div>
     
@@ -416,6 +419,16 @@
     
     <div id="certificate-box" style="display:none;"></div>
     <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट व सर्टिफिकेट प्रिंट करें</button>
+</div>
+
+<!-- 🚨 नई सुरक्षा लॉक स्क्रीन संरचना -->
+<div class="security-lock-overlay" id="security-lock">
+    <div class="security-lock-box">
+        <h2 style="color: #e53e3e; margin-top: 0;">⚠️ सुरक्षा नियम उल्लंघन! ⚠️</h2>
+        <p style="font-size: 15px; line-height: 1.6;">आपने अनिवार्य फुलस्क्रीन मोड को बंद करने का प्रयास किया है। यह परीक्षा नियमों के विरुद्ध है।</p>
+        <p style="font-size: 18px; font-weight: bold; color: #dd6b20;">स्वतः सबमिशन से बचने के लिए शेष समय: <span id="lock-timer" style="font-size: 24px; color: #e53e3e;">10</span> सेकंड</p>
+        <button class="lock-btn" onclick="resumeFullscreen()">🖥️ फुलस्क्रीन वापस सक्षम करें</button>
+    </div>
 </div>
 
 <div class="dashboard-container">
@@ -449,167 +462,169 @@
 </div>
 
 <script>
-    // 🌍 [यहाँ आपके असली गिटहब फोल्डर के अनुसार बिल्कुल सही लिंक्स सेट कर दिए हैं]
-    const GITHUB_CONFIG = {
-        subj1: {
-            name: "गणित (Mathematics)",
-            url: "maths.csv"
-        },
-        subj2: {
-            name: "विज्ञान (Science)",
-            url: "science.csv"
-        },
-        subj3: {
-            name: "हिंदी (Hindi)",
-            url: "hindi.csv"
-        },
-        signatureUrl: "signature.png"
-    };
+    const SIGNATURE_URL = "signature.png";
 
     let activeQuestions = [];
     let timeLeft = 0; 
     let timerInterval;
+    let fullscreenTimeout;
     let isSubmitted = false;
     let examActive = false;
     let cheatCount = 0;
-
-    let dataSubj1 = [];
-    let dataSubj2 = [];
-    let dataSubj3 = [];
     let selectedSubjectName = "";
+
+    let dataSubj1 = [
+        { question: "यदि 2x + 5 = 15 है, तो x का मान what होगा?", options: ["3", "5", "7", "10"], answer: "5", time: 45 },
+        { question: "सबसे छोटी अभाज्य संख्या (Prime Number) कौन सी है?", options: ["0", "1", "2", "3"], answer: "2", time: 30 },
+        { question: "वृत्त के क्षेत्रफल का सही सूत्र क्या है?", options: ["2πr", "πr²", "πr³", "2πr²"], answer: "πr²", time: 45 },
+        { question: "9 का वर्गमूल (Square Root) क्या होगा?", options: ["3", "18", "81", "1"], answer: "3", time: 30 },
+        { question: "त्रिभुज के तीनों आंतरिक कोणों का योग कितना होता है?", options: ["90°", "180°", "270°", "360°"], answer: "180°", time: 30 },
+        { question: "समकोण (Right Angle) कितने डिग्री का होता है?", options: ["45°", "60°", "90°", "120°"], answer: "90°", time: 30 },
+        { question: "संख्या 25 का वर्ग (Square) क्या होगा?", options: ["50", "125", "225", "625"], answer: "625", time: 45 },
+        { question: "यदि किसी वृत्त का व्यास 14 सेमी है, तो उसकी त्रिज्या क्या होगी?", options: ["7 सेमी", "14 सेमी", "21 सेमी", "28 सेमी"], answer: "7 सेमी", time: 45 },
+        { question: "सबसे छोटी पूर्ण संख्या (Whole Number) कौन सी है?", options: ["-1", "0", "1", "2"], answer: "0", time: 30 },
+        { question: "आयताकार खेत का क्षेत्रफल ज्ञात करने का सूत्र क्या है?", options: ["भुजा × भुजा", "लंबाई × चौड़ाई", "2(लंबाई + चौड़ाई)", "लंबाई + चौड़ाई"], answer: "लंबाई × चौड़ाई", time: 45 }
+    ];
+
+    let dataSubj2 = [
+        { question: "मानव शरीर की सबसे बड़ी हड्डी कौन सी है?", options: ["स्टेपीज", "फीमर", "टीबिया", "कशेरुक"], answer: "फीमर", time: 30 },
+        { question: "जल (Water) का सही रासायनिक सूत्र क्या है?", options: ["CO2", "H2O", "O2", "NaCl"], answer: "H2O", time: 30 },
+        { question: "प्रकाश संश्लेषण (Photosynthesis) के लिए कौन सी गैस आवश्यक है?", options: ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "हाइड्रोजन"], answer: "कार्बन डाइऑक्साइड", time: 30 },
+        { question: "साधारण नमक का रासायनिक नाम और सूत्र क्या है?", options: ["NaOH", "HCl", "NaCl", "NaHCO3"], answer: "NaCl", time: 30 },
+        { question: "विटामिन सी (Vitamin C) का सबसे अच्छा स्रोत कौन सा है?", options: ["दूध", "गाजर", "आंवला/नींबू", "सेब"], answer: "आंवला/नींबू", time: 30 },
+        { question: "सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", options: ["पृथ्वी", "मंगल", "शुक्र", "बृहस्पति"], answer: "बृहस्पति", time: 30 },
+        { question: "मानव शरीर का सामान्य तापमान कितना होता है?", options: ["32°C", "37°C", "42°C", "98°C"], answer: "37°C", time: 30 },
+        { question: "गुरुत्वाकर्षण (Gravity) की खोज किस वैज्ञानिक ने की थी?", options: ["आइंस्टीन", "न्यूटन", "गैलीलियो", "डॉल्टन"], answer: "न्यूटन", time: 30 },
+        { question: "वायुमंडल में सबसे अधिक मात्रा में पाई जाने वाली गैस कौन सी है?", options: ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "आर्गन"], answer: "नाइट्रोजन", time: 30 },
+        { question: "इलेक्ट्रॉन की खोज किसने की थी?", options: ["जे.जे. थॉमसन", "रदरफोर्ड", "चैडविक", "न्यूटन"], answer: "जे.जे. थॉमसन", time: 30 }
+    ];
+
+    let dataSubj3 = [
+        { question: "हिंदी वर्णमाला में कुल कितने मुख्य स्वर होते हैं?", options: ["11", "13", "33", "52"], answer: "11", time: 30 },
+        { question: "निम्नलिखित में से शुद्ध वर्तनी का चयन कीजिए:", options: ["आषिर्वाद", "आशीर्वाद", "अशीर्वाद", "आशिरवाद"], answer: "आशीर्वाद", time: 30 },
+        { question: "सूर्योदय का सही संधि-विच्छेद क्या होगा?", options: ["सूर्य + दय", "सूर्य + उदय", "सूर्यो + दय", "सूर + उदय"], answer: "सूर्य + उदय", time: 30 },
+        { question: "संज्ञा के स्थान पर प्रयुक्त होने वाले शब्दों को क्या कहते हैं?", options: ["विशेषण", "क्रिया", "सर्वनाम", "अव्यय"], answer: "सर्वनाम", time: 30 },
+        { question: "'कमल' का सही पर्यायवाची शब्द कौन सा है?", options: ["जलज", "जलद", "जलधि", "अंबर"], answer: "जलज", time: 30 },
+        { question: "'आकाश' का सही विलोम शब्द क्या होगा?", options: ["धरती", "पाताल", "समुद्र", "पावन"], answer: "पाताल", time: 30 },
+        { question: "भाषा की सबसे छोटी मौखिक व लिखित इकाई को क्या कहते हैं?", options: ["शब्द", "वाक्य", "वर्ण", "पद"], answer: "वर्ण", time: 30 },
+        { question: "संज्ञा के मुख्य रूप से कितने भेद होते हैं?", options: ["2", "3", "5", "6"], answer: "3", time: 30 },
+        { question: "'9 दो 11 होना' मुहावरे का सही अर्थ क्या है?", options: ["गणित सीखना", "भाग जाना", "साथ देना", "झगड़ा करना"], answer: "भाग जाना", time: 30 },
+        { question: "जो सब कुछ जानता हो, वाक्यांश के लिए एक शब्द क्या होगा?", options: ["अल्पज्ञ", "सर्वज्ञ", "विद्वान", "बुद्धिमान"], answer: "सर्वज्ञ", time: 30 }
+    ];
 
     loadHistory();
 
     window.addEventListener('DOMContentLoaded', () => {
         setupDropdownNames();
-        loadAllDataFromGitHub();
+        initializePortalData();
     });
 
     function setupDropdownNames() {
         const select = document.getElementById('s-subject');
         select.innerHTML = `
-            <option value="1">${GITHUB_CONFIG.subj1.name}</option>
-            <option value="2">${GITHUB_CONFIG.subj2.name}</option>
-            <option value="3">${GITHUB_CONFIG.subj3.name}</option>
+            <option value="1">गणित (Mathematics)</option>
+            <option value="2">विज्ञान (Science)</option>
+            <option value="3">हिंदी (Hindi)</option>
         `;
     }
 
-    // 🔍 उन्नत एरर डिटेक्टर फ़ंक्शन
-    async function loadAllDataFromGitHub() {
+    function initializePortalData() {
         const statusBox = document.getElementById('load-status');
-        try {
-            // 1. गणित फ़ाइल टेस्ट
-            statusBox.innerHTML = "🔄 1/4: गणित फ़ाइल लोड की जा रही है...";
-            let res1 = await fetch(GITHUB_CONFIG.subj1.url);
-            if (!res1.ok) throw new Error(`[${GITHUB_CONFIG.subj1.name}] फ़ाइल नहीं मिली! (Status: ${res1.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
-            let text1 = await res1.text();
-            dataSubj1 = parseCSVText(text1);
-
-            // 2. विज्ञान फ़ाइल टेस्ट
-            statusBox.innerHTML = "🔄 2/4: विज्ञान फ़ाइल लोड की जा रही है...";
-            let res2 = await fetch(GITHUB_CONFIG.subj2.url);
-            if (!res2.ok) throw new Error(`[${GITHUB_CONFIG.subj2.name}] फ़ाइल नहीं मिली! (Status: ${res2.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
-            let text2 = await res2.text();
-            dataSubj2 = parseCSVText(text2);
-
-            // 3. हिंदी फ़ाइल टेस्ट
-            statusBox.innerHTML = "🔄 3/4: हिंदी फ़ाइल लोड की जा रही है...";
-            let res3 = await fetch(GITHUB_CONFIG.subj3.url);
-            if (!res3.ok) throw new Error(`[${GITHUB_CONFIG.subj3.name}] फ़ाइल नहीं मिली! (Status: ${res3.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
-            let text3 = await res3.text();
-            dataSubj3 = parseCSVText(text3);
-
-            // 4. सिग्नेचर इमेज टेस्ट
-            statusBox.innerHTML = "🔄 4/4: मार्गदर्शक हस्ताक्षर जाँचे जा रहे हैं...";
-            let resSign = await fetch(GITHUB_CONFIG.signatureUrl);
-            if (!resSign.ok) throw new Error(`[हस्ताक्षर इमेज] गिटहब पर नहीं मिली! (Status: ${resSign.status})। क्या आपने फाइल का नाम 'signature.png' रखा है?`);
-
-            // यदि सब सही रहा
-            statusBox.style.background = "#f0fff4";
-            statusBox.style.color = "#22543d";
-            statusBox.style.border = "1px solid #c6f6d5";
-            statusBox.innerHTML = "✅ बधाई हो! सभी 3 विषय की CSV फाइलें एवं मार्गदर्शक हस्ताक्षर GitHub से सफलतापूर्व लोड हो चुके हैं। परीक्षा शुरू की जा सकती है।";
-            
-            const startBtn = document.getElementById('start-btn');
-            startBtn.disabled = false;
-            startBtn.innerHTML = "🔐 परीक्षा शुरू करें (Start Exam)";
-        } catch (error) {
-            statusBox.style.background = "#fff5f5";
-            statusBox.style.color = "#9b2c2c";
-            statusBox.style.border = "2px solid #e53e3e";
-            statusBox.innerHTML = `❌ <b>डेटा लोड एरर आया है!</b><br>🔍 <b>कारण:</b> ${error.message}<br><br>💡 <b>इसे कैसे ठीक करें?</b><br>1. चेक करें कि आपकी गिटहब रिपोजिटरी 'Public' है या नहीं।<br>2. क्या कोड में 'main' की जगह आपकी रिपोजिटरी में 'master' ब्रांच तो नहीं है?`;
-            console.error(error);
-        }
+        statusBox.style.background = "#f0fff4";
+        statusBox.style.color = "#22543d";
+        statusBox.style.border = "1px solid #c6f6d5";
+        statusBox.innerHTML = "✅ मजबूत सुरक्षा परत (Anti-Cheat Security Pack) लोड हो चुका है। परीक्षा पूर्णतः सुरक्षित वातावरण में होगी।";
+        
+        const startBtn = document.getElementById('start-btn');
+        startBtn.disabled = false;
+        startBtn.innerHTML = "🔐 परीक्षा शुरू करें (Start Exam)";
     }
 
-    function parseCSVText(text) {
-        let lines = text.split('\n');
-        let list = [];
-        for (let i = 1; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (!line) continue;
-            let parts = line.split(',');
-            if (parts.length >= 6) {
-                let questionTime = 60; 
-                if (parts[6] && !isNaN(parts[6].trim())) {
-                    questionTime = parseInt(parts[6].trim());
-                }
-                list.push({
-                    question: parts[0].trim(),
-                    options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
-                    answer: parts[5].trim(),
-                    time: questionTime
-                });
-            }
-        }
-        return list;
-    }
-
-    // 🔒 एंटी-चीट सुरक्षा
+    // 🔒 लोहे जैसी मजबूत एंटी-चीट सुरक्षा स्क्रिप्ट्स
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('paste', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('selectstart', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('dragstart', e => { if(examActive) e.preventDefault(); });
 
     document.addEventListener('keydown', e => {
         if (examActive) {
-            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I") || (e.ctrlKey && e.key === "u") || (e.ctrlKey && e.key === "U")) {
+            // F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+A को पूरी तरह ब्लॉक किया
+            if (e.key === "F12" || 
+                (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) || 
+                (e.ctrlKey && (e.key === "U" || e.key === "u" || e.key === "S" || e.key === "s" || e.key === "P" || e.key === "p" || e.key === "A" || e.key === "a"))) {
                 e.preventDefault();
-                triggerSecurityViolation("कीबोर्ड शॉर्टकट लॉक का उल्लंघन!");
+                triggerSecurityViolation("प्रतिबंधित कीबोर्ड शॉर्टकट का उपयोग ब्लॉक किया गया!");
             }
         }
     });
 
     document.addEventListener('visibilitychange', () => {
         if (examActive && !isSubmitted && document.hidden) {
-            triggerSecurityViolation("ब्राउज़र टैब बदलने का प्रयास किया गया!");
+            triggerSecurityViolation("ब्राउज़र टैब या विंडो बदलने का प्रयास!");
         }
     });
 
     window.addEventListener('blur', () => {
         if (examActive && !isSubmitted) {
-            triggerSecurityViolation("परीक्षा के दौरान अन्य विंडो पर जाने का प्रयास!");
+            triggerSecurityViolation("परीक्षा स्क्रीन से हटने (Alt+Tab / Window Move) का प्रयास!");
         }
     });
 
     document.addEventListener('fullscreenchange', () => {
         if (examActive && !document.fullscreenElement && !isSubmitted) {
-            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड को छोड़ने का प्रयास!");
+            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड बंद करने का प्रयास!");
+            showSecurityLockScreen();
         }
     });
 
     function triggerSecurityViolation(reason) {
+        if (isSubmitted) return;
         cheatCount++;
         document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/3)`;
+        
         if (cheatCount >= 3) {
-            alert(`🚨 गंभीर सुरक्षा उल्लंघन! परीक्षा स्वतः समाप्त की जा रही है।`);
+            clearInterval(timerInterval);
+            clearInterval(fullscreenTimeout);
+            document.getElementById('security-lock').style.display = "none";
+            alert(`🚨 गंभीर सुरक्षा उल्लंघन! लगातार 3 चेतावनियों के बाद आपका परीक्षा सत्र स्वतः समाप्त कर दिया गया है।`);
             checkAnswers(true);
         } else {
-            alert(`⚠️ चेतावनी ${cheatCount}: ${reason}\n3 चेतावनियों के बाद पेपर स्वतः लॉक हो जाएगा।`);
-            if (!document.fullscreenElement && examActive) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
+            alert(`⚠️ सुरक्षा चेतावनी ${cheatCount}/3:\n${reason}\n\n3 चेतावनियों के बाद आपका पेपर तत्काल ब्लॉक होकर स्वतः जमा हो जाएगा।`);
         }
+    }
+
+    // 🖥️ एडवांस फुलस्क्रीन लॉक सिस्टम
+    function showSecurityLockScreen() {
+        if (cheatCount >= 3 || isSubmitted) return;
+        
+        const lockOverlay = document.getElementById('security-lock');
+        lockOverlay.style.display = "flex";
+        
+        let timeLeftToLock = 10;
+        document.getElementById('lock-timer').innerText = timeLeftToLock;
+        
+        clearInterval(fullscreenTimeout);
+        fullscreenTimeout = setInterval(() => {
+            timeLeftToLock--;
+            document.getElementById('lock-timer').innerText = timeLeftToLock;
+            if (timeLeftToLock <= 0) {
+                clearInterval(fullscreenTimeout);
+                lockOverlay.style.display = "none";
+                alert("🚨 समय समाप्त! निर्धारित समय में फुलस्क्रीन पर न लौटने के कारण परीक्षा स्वतः सबमिट की जा रही है।");
+                checkAnswers(true);
+            }
+        }, 1000);
+    }
+
+    function resumeFullscreen() {
+        document.documentElement.requestFullscreen().then(() => {
+            clearInterval(fullscreenTimeout);
+            document.getElementById('security-lock').style.display = "none";
+        }).catch(() => {
+            alert("त्रुटि: कृपया ब्राउज़र को फुलस्क्रीन की अनुमति दें!");
+        });
     }
 
     function shuffleQuestions(array) {
@@ -631,16 +646,11 @@
         }
 
         let selectedSourceArray = [];
-        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = GITHUB_CONFIG.subj1.name; }
-        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = GITHUB_CONFIG.subj2.name; }
-        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = GITHUB_CONFIG.subj3.name; }
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = "गणित (Mathematics)"; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = "विज्ञान (Science)"; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = "हिंदी (Hindi)"; }
 
-        if (selectedSourceArray.length === 0) {
-            alert(`⚠️ इस विषय का डेटा अभी लोड नहीं हो पाया है!`);
-            return;
-        }
-
-        activeQuestions = shuffleQuestions([...selectedSourceArray]);
+        activeQuestions = shuffleQuestions([...selectedSourceArray]).slice(0, 10);
 
         let totalExamSeconds = 0;
         activeQuestions.forEach(q => { totalExamSeconds += q.time; });
@@ -663,7 +673,7 @@
             renderQuestions();
             startTimer();
         }).catch(() => {
-            alert("❌ परीक्षा प्रारंभ करने के लिए फुलस्क्रीन की अनुमति आवश्यक है।");
+            alert("❌ सुरक्षा प्रोटोकॉल: परीक्षा प्रारंभ करने के लिए अनिवार्य फुलस्क्रीन मोड की अनुमति आवश्यक है।");
         });
     }
 
@@ -731,11 +741,32 @@
     function checkAnswers(isAutoSubmit) {
         if(isSubmitted) return;
 
+        if (!isAutoSubmit) {
+            let unansweredQuestions = [];
+            activeQuestions.forEach((_, index) => {
+                const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
+                if (!selectedOpt) {
+                    unansweredQuestions.push(index + 1);
+                }
+            });
+
+            if (unansweredQuestions.length > 0) {
+                alert(`⚠️ परीक्षा सबमिट नहीं की जा सकती!\n\nआपने प्रश्न संख्या: ${unansweredQuestions.join(', ')} का उत्तर नहीं दिया है।\n\nनियम: कृपया या तो सही उत्तर चुनें या 'E) प्रश्न स्किप करें' विकल्प को चुनें।`);
+                const firstUnansweredBlock = document.getElementsByClassName('question-block')[unansweredQuestions[0] - 1];
+                if (firstUnansweredBlock) {
+                    firstUnansweredBlock.scrollIntoView({ behavior: 'smooth' });
+                }
+                return;
+            }
+        }
+
         clearInterval(timerInterval);
+        clearInterval(fullscreenTimeout);
         isSubmitted = true;
         examActive = false;
 
         if (document.fullscreenElement) { document.exitFullscreen(); }
+        document.getElementById('security-lock').style.display = "none";
 
         let now = new Date();
         let day = String(now.getDate()).padStart(2, '0');
@@ -792,7 +823,12 @@
             });
         });
 
+        // यदि सुरक्षा उल्लंघन 3 या उससे अधिक बार हुआ हो तो रिजल्ट में सुरक्षा के कारण 0 अंक कर दिए जाएंगे।
         let finalMarks = Math.max(0, calculatedMarks);
+        if(cheatCount >= 3) {
+            finalMarks = 0;
+        }
+
         document.getElementById('quiz-form').style.display = "none";
 
         const resultDiv = document.getElementById('final-result');
@@ -803,6 +839,7 @@
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             <div style="text-align: center; margin: 15px 0;">
                 <span style="font-size: 14px; color:#718096;">⏱️ परीक्षा समाप्ति का समय: <b>${currentLiveExamDateTime}</b></span><br>
+                <span style="font-size: 14px; color:#e53e3e; font-weight:bold;">🛡️ कुल सुरक्षा उल्लंघन: ${cheatCount} / 3 ${cheatCount >= 3 ? '(सत्र सस्पेंड किया गया)' : ''}</span><br>
                 <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong} | स्किप: ${totalSkipped}</span><br>
                 <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
             </div>
@@ -812,7 +849,7 @@
             </table>
         `;
         
-        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4); 
+        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4) && cheatCount < 3; 
         resultDiv.className = isPassed ? "result correct-bg" : "result needs-improvement-bg";
         
         const nameInput = document.getElementById('s-name').value;
@@ -823,7 +860,7 @@
             const certDiv = document.getElementById('certificate-box');
             certDiv.style.display = "block";
             
-            let signRenderHtml = `<img src="${GITHUB_CONFIG.signatureUrl}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
+            let signRenderHtml = `<img src="${SIGNATURE_URL}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
 
             certDiv.innerHTML = `
                 <div class="certificate-card">
@@ -853,7 +890,7 @@
         document.getElementById('header-bar').style.display = "none";
         document.getElementById('print-btn').style.display = "block";
         
-        let grade = finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
+        let grade = cheatCount >= 3 ? "FAIL (SUSPENDED)" : finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
         saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
@@ -893,7 +930,7 @@
                     <td><b>${item.subject}</b></td>
                     <td style="font-size:12px;">${item.date}</td>
                     <td><b>${item.marks}</b></td>
-                    <td><span style="font-weight:bold; color:#2b6cb0;">${item.grade}</span></td>
+                    <td><span style="font-weight:bold; color:${item.grade.includes('FAIL') ? '#e53e3e':'#2b6cb0'};">${item.grade}</span></td>
                 </tr>
             `;
         }
@@ -944,7 +981,7 @@
         let url = URL.createObjectURL(blob);
         let link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "Gyan_Jyoti_LiveTime_Results.csv");
+        link.setAttribute("download", "Gyan_Jyoti_Proctor_Results.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
