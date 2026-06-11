@@ -624,24 +624,24 @@
     function triggerSecurityViolation(reason) {
         if (isSubmitted) return;
         cheatCount++;
-        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/3)`;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/5)`;
         
-        if (cheatCount >= 3) {
+        if (cheatCount >= 5) {
             clearInterval(timerInterval);
             clearInterval(fullscreenTimeout);
             document.getElementById('security-lock').style.display = "none";
             checkAnswers(true);
         } else {
-            showCustomToast(`${reason} (चेतावनी ${cheatCount}/3)`);
+            showCustomToast(`${reason} (चेतावनी ${cheatCount}/5)`);
         }
     }
 
     function showSecurityLockScreen() {
-        if (cheatCount >= 3 || isSubmitted) return;
+        if (cheatCount >= 5 || isSubmitted) return;
         cheatCount++;
-        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/3)`;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/5)`;
         
-        if (cheatCount >= 3) { checkAnswers(true); return; }
+        if (cheatCount >= 5) { checkAnswers(true); return; }
 
         const lockOverlay = document.getElementById('security-lock');
         lockOverlay.style.display = "flex";
@@ -825,7 +825,7 @@
         });
 
         let finalMarks = Math.max(0, calculatedMarks);
-        if(cheatCount >= 3) { finalMarks = 0; }
+        if(cheatCount >= 5) { finalMarks = 0; }
 
         document.getElementById('quiz-form').style.display = "none";
         const resultDiv = document.getElementById('final-result');
@@ -836,7 +836,7 @@
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             <div style="text-align: center; margin: 15px 0;">
                 <span style="font-size: 14px; color:#718096;">⏱️ समय: <b>${currentLiveExamDateTime}</b></span><br>
-                <span style="font-size: 14px; color:#e53e3e; font-weight:bold;">🛡️ सुरक्षा उल्लंघन: ${cheatCount} / 3</span><br>
+                <span style="font-size: 14px; color:#e53e3e; font-weight:bold;">🛡️ सुरक्षा उल्लंघन: ${cheatCount} / 5</span><br>
                 <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong}</span><br>
                 <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
             </div>
@@ -846,7 +846,7 @@
             </table>
         `;
         
-        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4) && cheatCount < 3; 
+        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4) && cheatCount < 5; 
         resultDiv.className = isPassed ? "result correct-bg" : "result needs-improvement-bg";
         
         const nameInput = document.getElementById('s-name').value;
@@ -881,7 +881,7 @@
         document.getElementById('header-bar').style.display = "none";
         document.getElementById('print-btn').style.display = "block";
         
-        let grade = cheatCount >= 3 ? "FAIL (SUSPENDED)" : finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
+        let grade = cheatCount >= 5 ? "FAIL (SUSPENDED)" : finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
         saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
