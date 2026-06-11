@@ -126,7 +126,6 @@
             background: white;
         }
 
-        /* शिक्षक फाइल अपलोड सेक्शन */
         .csv-setup-box {
             grid-column: span 2; 
             background: #ebf8ff; 
@@ -491,7 +490,6 @@
     let cheatCount = 0;
     let signImgData = ""; 
 
-    // 3 अलग-अलग विषयों के प्रश्नों को स्टोर करने के लिए एरे
     let dataSubj1 = [];
     let dataSubj2 = [];
     let dataSubj3 = [];
@@ -501,7 +499,6 @@
     syncDropdown();
     loadHistory();
 
-    // ✍️ विषय नामों को ड्रॉपडाउन मेनू के साथ सिंक करना
     function syncDropdown() {
         const s1 = document.getElementById('subj1-name').value || "विषय 1";
         const s2 = document.getElementById('subj2-name').value || "विषय 2";
@@ -513,7 +510,6 @@
         select.options[2].text = s3;
     }
 
-    // 📂 तीनों CSV फ़ाइलों को अलग-अलग रीड करने के लिसनर्स
     document.getElementById('csv-file-1').addEventListener('change', e => { readCSVFile(e.target.files[0], 1); });
     document.getElementById('csv-file-2').addEventListener('change', e => { readCSVFile(e.target.files[0], 2); });
     document.getElementById('csv-file-3').addEventListener('change', e => { readCSVFile(e.target.files[0], 3); });
@@ -527,10 +523,10 @@
             if(slotNum === 2) dataSubj2 = parsed;
             if(slotNum === 3) dataSubj3 = parsed;
         };
-        reader.readAsText(file);
+        // 🌟 यहाँ 'UTF-8' फ़ोर्स किया गया है ताकि हिंदी फ़ॉन्ट न टूटे
+        reader.readAsText(file, 'UTF-8');
     }
 
-    // ✍️ मार्गदर्शक सिग्नेचर इमेज लोडर
     document.getElementById('p-sign-file').addEventListener('change', function(e) {
         let file = e.target.files[0];
         if(file) {
@@ -540,7 +536,6 @@
         }
     });
 
-    // 🔒 एंटी-चीट सुरक्षा प्रणाली
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
@@ -563,7 +558,7 @@
 
     window.addEventListener('blur', () => {
         if (examActive && !isSubmitted) {
-            triggerSecurityViolation("लोकल ऑफलाइन फाइल या बैकग्राउंड नोट्स खोलने का प्रयास!");
+            triggerSecurityViolation("लोकल ऑफलाइन फाइल खोलने का प्रयास!");
         }
     });
 
@@ -587,7 +582,6 @@
         }
     }
 
-    // 🎲 रैंडम शफल एल्गोरिथ्म (Fisher-Yates)
     function shuffleQuestions(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -596,7 +590,6 @@
         return array;
     }
 
-    // 📊 CSV पार्सर
     function parseCSVText(text) {
         let lines = text.split('\n');
         let list = [];
@@ -635,7 +628,6 @@
             return;
         }
 
-        // 🎲 प्रश्नों को रैंडमाइज (शफल) करना ताकि किसी के पास एक जैसा पेपर न आए
         activeQuestions = shuffleQuestions([...selectedSourceArray]);
 
         document.documentElement.requestFullscreen().then(() => {
@@ -645,7 +637,6 @@
             document.getElementById('s-gender').disabled = true;
             document.getElementById('p-sign-file').disabled = true;
             
-            // शिक्षक इनपुट लॉक करना
             document.getElementById('subj1-name').disabled = true;
             document.getElementById('subj2-name').disabled = true;
             document.getElementById('subj3-name').disabled = true;
@@ -678,7 +669,7 @@
             
             let optionsHtml = '';
             item.options.forEach((opt, optIndex) => {
-                let letter = String.fromCharCode(65 + optIndex); // A, B, C, D
+                let letter = String.fromCharCode(65 + optIndex); 
                 optionsHtml += `
                     <div class="option-item">
                         <input type="radio" name="q-${index}" id="q-${index}-o-${optIndex}" value="${opt}" onchange="updateProgress()">
@@ -687,7 +678,6 @@
                 `;
             });
 
-            // 5वां विकल्प (E) स्किप करने के लिए स्वतः जोड़ना
             optionsHtml += `
                 <div class="option-item skip-opt-style">
                     <input type="radio" name="q-${index}" id="q-${index}-o-skip" value="__SKIP__" onchange="updateProgress()">
