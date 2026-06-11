@@ -252,4 +252,711 @@
             border: 10px double #b7791f;
             padding: 30px;
             text-align: center;
-            border-
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 26px; margin-top: 0; }
+        .certificate-card h4 { color: #4a5568; letter-spacing: 1px; margin: 10px 0; }
+        .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
+        
+        .uploaded-sign-img {
+            max-height: 55px;
+            max-width: 160px;
+            display: block;
+            margin: 0 auto 2px auto;
+        }
+
+        .dashboard-container {
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 750px;
+            width: 100%;
+        }
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        .dashboard-table th, .dashboard-table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            text-align: left;
+        }
+        .dashboard-table th {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        .roll-link {
+            color: #3182ce;
+            font-weight: bold;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .action-bar {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .top-btn {
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .clear-btn { background: #e53e3e; }
+        .excel-btn { background: #3182ce; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box { display: none !important; }
+            .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
+            .result { border: 1px solid #cbd5e0; background: white !important; }
+            .certificate-card { border: 8px double #b7791f; page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h1>
+    <div class="subtitle">📍 सूरतगढ़, श्रीगंगानगर, राजस्थान</div>
+    
+    <div class="rules-tag">
+        📋 <b>परीक्षा के नियम एवं निर्देश:</b><br>
+        1. सभी प्रश्न करने अनिवार्य हैं।<br>
+        2. प्रत्येक प्रश्न का समय उसकी फ़ाइल के अनुसार परीक्षा टाइमर में ऑटो-जोड़ दिया गया है।<br>
+        3. सही उत्तर मिलने पर +10 अंक दिए जाएंगे, गलत उत्तर पर -3 अंक की कटौती होगी। प्रश्न स्किप करने पर 0 अंक मिलेगा।<br>
+        4. परीक्षा समाप्ति का सटीक समय और तारीख सिस्टम द्वारा ऑटो-रिकॉर्ड की जाएगी।
+    </div>
+    
+    <div class="sticky-header" id="header-bar">
+        <div class="timer-box" id="timer-display">⏱️ शेष समय: गणना की जा रही है...</div>
+        <div class="security-badge" id="cheat-display">🛡️ सुरक्षा स्थिति: सुरक्षित (उल्लंघन काउंट: 0/3)</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="p-bar"></div>
+        </div>
+    </div>
+    
+    <div class="student-info" id="info-card">
+        <h3>📋 परीक्षा फॉर्म (Exam Registration)</h3>
+        <div class="info-grid">
+            <div class="info-group">
+                <label>छात्र या छात्रा चुनें:</label>
+                <select id="s-gender">
+                    <option value="छात्र">छात्र (Boy)</option>
+                    <option value="छात्रा">छात्रा (Girl)</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>परीक्षार्थी का पूरा नाम:</label>
+                <input type="text" id="s-name" placeholder="अपना नाम लिखें">
+            </div>
+            <div class="info-group">
+                <label>अनुक्रमांक (Roll No):</label>
+                <input type="text" id="s-roll" placeholder="रोल नंबर लिखें">
+            </div>
+            <div class="info-group">
+                <label>परीक्षा का विषय (Select Subject):</label>
+                <select id="s-subject"></select>
+            </div>
+
+            <div class="status-box" id="load-status">🔄 GitHub से परीक्षा फाइलें लोड की जा रही हैं, कृपया प्रतीक्षा करें...</div>
+        </div>
+    </div>
+    
+    <button class="btn" id="start-btn" onclick="startExam()" disabled>🔐 डेटा लोड हो रहा है...</button>
+    
+    <div id="quiz-form" style="display:none;"></div>
+    
+    <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
+    <div id="final-result" class="result" style="display:none;"></div>
+    
+    <div id="certificate-box" style="display:none;"></div>
+    <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट व सर्टिफिकेट प्रिंट करें</button>
+</div>
+
+<div class="dashboard-container">
+    <div class="action-bar">
+        <button class="top-btn excel-btn" onclick="downloadExcel()">📥 Excel डाउनलोड करें</button>
+        <button class="top-btn clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
+    </div>
+    <h3>📜 परिणाम सूची एवं छात्र रिकॉर्ड</h3>
+    <table class="dashboard-table">
+        <thead>
+            <tr>
+                <th>रैंक</th>
+                <th>नाम</th>
+                <th>रोल नंबर</th>
+                <th>विषय</th>
+                <th>परीक्षा देने का समय</th>
+                <th>प्राप्तांक</th>
+                <th>ग्रेड</th>
+            </tr>
+        </thead>
+        <tbody id="history-rows"></tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="details-modal">
+    <div class="modal-box">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र विस्तृत उत्तर कुंजी</h3>
+        <div id="modal-content"></div>
+    </div>
+</div>
+
+<script>
+    // 🌍 [यहाँ आपके असली गिटहब फोल्डर के अनुसार बिल्कुल सही लिंक्स सेट कर दिए हैं]
+    const GITHUB_CONFIG = {
+        subj1: {
+            name: "गणित (Mathematics)",
+            url: "https://raw.githubusercontent.com/vinodsaharan/vinodsaharan.github.io/main/maths.csv"
+        },
+        subj2: {
+            name: "विज्ञान (Science)",
+            url: "https://raw.githubusercontent.com/vinodsaharan/vinodsaharan.github.io/main/science.csv"
+        },
+        subj3: {
+            name: "हिंदी (Hindi)",
+            url: "https://raw.githubusercontent.com/vinodsaharan/vinodsaharan.github.io/main/hindi.csv"
+        },
+        signatureUrl: "https://raw.githubusercontent.com/vinodsaharan/vinodsaharan.github.io/main/signature.png"
+    };
+
+    let activeQuestions = [];
+    let timeLeft = 0; 
+    let timerInterval;
+    let isSubmitted = false;
+    let examActive = false;
+    let cheatCount = 0;
+
+    let dataSubj1 = [];
+    let dataSubj2 = [];
+    let dataSubj3 = [];
+    let selectedSubjectName = "";
+
+    loadHistory();
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setupDropdownNames();
+        loadAllDataFromGitHub();
+    });
+
+    function setupDropdownNames() {
+        const select = document.getElementById('s-subject');
+        select.innerHTML = `
+            <option value="1">${GITHUB_CONFIG.subj1.name}</option>
+            <option value="2">${GITHUB_CONFIG.subj2.name}</option>
+            <option value="3">${GITHUB_CONFIG.subj3.name}</option>
+        `;
+    }
+
+    // 🔍 उन्नत एरर डिटेक्टर फ़ंक्शन
+    async function loadAllDataFromGitHub() {
+        const statusBox = document.getElementById('load-status');
+        try {
+            // 1. गणित फ़ाइल टेस्ट
+            statusBox.innerHTML = "🔄 1/4: गणित फ़ाइल लोड की जा रही है...";
+            let res1 = await fetch(GITHUB_CONFIG.subj1.url);
+            if (!res1.ok) throw new Error(`[${GITHUB_CONFIG.subj1.name}] फ़ाइल नहीं मिली! (Status: ${res1.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
+            let text1 = await res1.text();
+            dataSubj1 = parseCSVText(text1);
+
+            // 2. विज्ञान फ़ाइल टेस्ट
+            statusBox.innerHTML = "🔄 2/4: विज्ञान फ़ाइल लोड की जा रही है...";
+            let res2 = await fetch(GITHUB_CONFIG.subj2.url);
+            if (!res2.ok) throw new Error(`[${GITHUB_CONFIG.subj2.name}] फ़ाइल नहीं मिली! (Status: ${res2.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
+            let text2 = await res2.text();
+            dataSubj2 = parseCSVText(text2);
+
+            // 3. हिंदी फ़ाइल टेस्ट
+            statusBox.innerHTML = "🔄 3/4: हिंदी फ़ाइल लोड की जा रही है...";
+            let res3 = await fetch(GITHUB_CONFIG.subj3.url);
+            if (!res3.ok) throw new Error(`[${GITHUB_CONFIG.subj3.name}] फ़ाइल नहीं मिली! (Status: ${res3.status})। कृपया गिटहब लिंक या फ़ाइल का नाम चेक करें।`);
+            let text3 = await res3.text();
+            dataSubj3 = parseCSVText(text3);
+
+            // 4. सिग्नेचर इमेज टेस्ट
+            statusBox.innerHTML = "🔄 4/4: मार्गदर्शक हस्ताक्षर जाँचे जा रहे हैं...";
+            let resSign = await fetch(GITHUB_CONFIG.signatureUrl);
+            if (!resSign.ok) throw new Error(`[हस्ताक्षर इमेज] गिटहब पर नहीं मिली! (Status: ${resSign.status})। क्या आपने फाइल का नाम 'signature.png' रखा है?`);
+
+            // यदि सब सही रहा
+            statusBox.style.background = "#f0fff4";
+            statusBox.style.color = "#22543d";
+            statusBox.style.border = "1px solid #c6f6d5";
+            statusBox.innerHTML = "✅ बधाई हो! सभी 3 विषय की CSV फाइलें एवं मार्गदर्शक हस्ताक्षर GitHub से सफलतापूर्व लोड हो चुके हैं। परीक्षा शुरू की जा सकती है।";
+            
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = false;
+            startBtn.innerHTML = "🔐 परीक्षा शुरू करें (Start Exam)";
+        } catch (error) {
+            statusBox.style.background = "#fff5f5";
+            statusBox.style.color = "#9b2c2c";
+            statusBox.style.border = "2px solid #e53e3e";
+            statusBox.innerHTML = `❌ <b>डेटा लोड एरर आया है!</b><br>🔍 <b>कारण:</b> ${error.message}<br><br>💡 <b>इसे कैसे ठीक करें?</b><br>1. चेक करें कि आपकी गिटहब रिपोजिटरी 'Public' है या नहीं।<br>2. क्या कोड में 'main' की जगह आपकी रिपोजिटरी में 'master' ब्रांच तो नहीं है?`;
+            console.error(error);
+        }
+    }
+
+    function parseCSVText(text) {
+        let lines = text.split('\n');
+        let list = [];
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            let parts = line.split(',');
+            if (parts.length >= 6) {
+                let questionTime = 60; 
+                if (parts[6] && !isNaN(parts[6].trim())) {
+                    questionTime = parseInt(parts[6].trim());
+                }
+                list.push({
+                    question: parts[0].trim(),
+                    options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
+                    answer: parts[5].trim(),
+                    time: questionTime
+                });
+            }
+        }
+        return list;
+    }
+
+    // 🔒 एंटी-चीट सुरक्षा
+    document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('paste', e => { if(examActive) e.preventDefault(); });
+
+    document.addEventListener('keydown', e => {
+        if (examActive) {
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I") || (e.ctrlKey && e.key === "u") || (e.ctrlKey && e.key === "U")) {
+                e.preventDefault();
+                triggerSecurityViolation("कीबोर्ड शॉर्टकट लॉक का उल्लंघन!");
+            }
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (examActive && !isSubmitted && document.hidden) {
+            triggerSecurityViolation("ब्राउज़र टैब बदलने का प्रयास किया गया!");
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        if (examActive && !isSubmitted) {
+            triggerSecurityViolation("परीक्षा के दौरान अन्य विंडो पर जाने का प्रयास!");
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (examActive && !document.fullscreenElement && !isSubmitted) {
+            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड को छोड़ने का प्रयास!");
+        }
+    });
+
+    function triggerSecurityViolation(reason) {
+        cheatCount++;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/3)`;
+        if (cheatCount >= 3) {
+            alert(`🚨 गंभीर सुरक्षा उल्लंघन! परीक्षा स्वतः समाप्त की जा रही है।`);
+            checkAnswers(true);
+        } else {
+            alert(`⚠️ चेतावनी ${cheatCount}: ${reason}\n3 चेतावनियों के बाद पेपर स्वतः लॉक हो जाएगा।`);
+            if (!document.fullscreenElement && examActive) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        }
+    }
+
+    function shuffleQuestions(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startExam() {
+        const name = document.getElementById('s-name').value.trim();
+        const roll = document.getElementById('s-roll').value.trim();
+        const subjectSlot = document.getElementById('s-subject').value;
+        
+        if (name === "" || roll === "") {
+            alert("⚠️ कृपया परीक्षार्थी का नाम और रोल नंबर अवश्य भरें।");
+            return;
+        }
+
+        let selectedSourceArray = [];
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = GITHUB_CONFIG.subj1.name; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = GITHUB_CONFIG.subj2.name; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = GITHUB_CONFIG.subj3.name; }
+
+        if (selectedSourceArray.length === 0) {
+            alert(`⚠️ इस विषय का डेटा अभी लोड नहीं हो पाया है!`);
+            return;
+        }
+
+        activeQuestions = shuffleQuestions([...selectedSourceArray]);
+
+        let totalExamSeconds = 0;
+        activeQuestions.forEach(q => { totalExamSeconds += q.time; });
+        timeLeft = totalExamSeconds;
+
+        document.documentElement.requestFullscreen().then(() => {
+            document.getElementById('s-name').readOnly = true;
+            document.getElementById('s-roll').readOnly = true;
+            document.getElementById('s-subject').disabled = true;
+            document.getElementById('s-gender').disabled = true;
+
+            document.getElementById('start-btn').style.display = "none";
+            document.getElementById('header-bar').style.display = "block";
+            document.getElementById('quiz-form').style.display = "block";
+            document.getElementById('submit-btn').style.display = "block";
+            
+            examActive = true;
+            cheatCount = 0;
+
+            renderQuestions();
+            startTimer();
+        }).catch(() => {
+            alert("❌ परीक्षा प्रारंभ करने के लिए फुलस्क्रीन की अनुमति आवश्यक है।");
+        });
+    }
+
+    function renderQuestions() {
+        const quizForm = document.getElementById('quiz-form');
+        quizForm.innerHTML = "";
+        
+        activeQuestions.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'question-block';
+            
+            let optionsHtml = '';
+            item.options.forEach((opt, optIndex) => {
+                let letter = String.fromCharCode(65 + optIndex); 
+                optionsHtml += `
+                    <div class="option-item">
+                        <input type="radio" name="q-${index}" id="q-${index}-o-${optIndex}" value="${opt}" onchange="updateProgress()">
+                        <label for="q-${index}-o-${optIndex}"><b>${letter})</b> ${opt}</label>
+                    </div>
+                `;
+            });
+
+            optionsHtml += `
+                <div class="option-item skip-opt-style">
+                    <input type="radio" name="q-${index}" id="q-${index}-o-skip" value="__SKIP__" onchange="updateProgress()">
+                    <label for="q-${index}-o-skip"><b>E)</b> प्रश्न स्किप करें (Skip Question)</label>
+                </div>
+            `;
+
+            div.innerHTML = `
+                <span class="marks-tag">समय: ${item.time}s | सही +10 | गलत -3</span>
+                <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
+                <div class="options-container">
+                    ${optionsHtml}
+                </div>
+            `;
+            quizForm.appendChild(div);
+        });
+    }
+
+    function updateProgress() {
+        let filledCount = 0;
+        activeQuestions.forEach((_, index) => {
+            if(document.querySelector(`input[name="q-${index}"]:checked`)) { filledCount++; }
+        });
+        const percentage = (filledCount / activeQuestions.length) * 100;
+        document.getElementById('p-bar').style.width = percentage + "%";
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त!";
+                if(!isSubmitted) checkAnswers(true);
+            } else {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('timer-display').innerHTML = `⏱️ शेष समय: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} मिनट`;
+            }
+        }, 1000);
+    }
+
+    function checkAnswers(isAutoSubmit) {
+        if(isSubmitted) return;
+
+        clearInterval(timerInterval);
+        isSubmitted = true;
+        examActive = false;
+
+        if (document.fullscreenElement) { document.exitFullscreen(); }
+
+        let now = new Date();
+        let day = String(now.getDate()).padStart(2, '0');
+        let month = String(now.getMonth() + 1).padStart(2, '0');
+        let year = now.getFullYear();
+        let hours = now.getHours();
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        let hoursStr = String(hours).padStart(2, '0');
+        let currentLiveExamDateTime = `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
+
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let totalSkipped = 0;
+        let calculatedMarks = 0;
+        let tableRowsHtml = ""; 
+        let detailedQuestionLog = []; 
+
+        activeQuestions.forEach((item, index) => {
+            const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
+            let statusText = "";
+            let selectedValue = "नहीं दिया";
+            
+            if (selectedOpt) {
+                selectedValue = selectedOpt.value;
+                if (selectedValue === "__SKIP__") {
+                    totalSkipped++;
+                    statusText = "<span class='status-skipped'>⚪ स्किप किया (0)</span>";
+                    selectedValue = "स्किप (E)";
+                } else if (selectedValue === item.answer) {
+                    totalCorrect++;
+                    calculatedMarks += 10;
+                    statusText = "<span class='status-correct'>✅ सही (+10)</span>";
+                } else {
+                    totalWrong++;
+                    calculatedMarks -= 3;
+                    statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
+                }
+            } else {
+                totalSkipped++;
+                statusText = "<span class='status-skipped'>⚪ अनुत्तरित / स्किप (0)</span>";
+            }
+
+            tableRowsHtml += `<tr><td><b>प्रश्न ${index + 1}</b></td><td>${statusText}</td></tr>`;
+
+            detailedQuestionLog.push({
+                qNum: index + 1,
+                question: item.question,
+                selected: selectedValue,
+                correct: item.answer,
+                status: statusText
+            });
+        });
+
+        let finalMarks = Math.max(0, calculatedMarks);
+        document.getElementById('quiz-form').style.display = "none";
+
+        const resultDiv = document.getElementById('final-result');
+        resultDiv.style.display = "block";
+        
+        resultDiv.innerHTML = `
+            <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
+            <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="font-size: 14px; color:#718096;">⏱️ परीक्षा समाप्ति का समय: <b>${currentLiveExamDateTime}</b></span><br>
+                <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong} | स्किप: ${totalSkipped}</span><br>
+                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
+            </div>
+            <table class="summary-table">
+                <thead><tr><th>प्रश्न संख्या</th><th>स्थिति (Status)</th></tr></thead>
+                <tbody>${tableRowsHtml}</tbody>
+            </table>
+        `;
+        
+        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4); 
+        resultDiv.className = isPassed ? "result correct-bg" : "result needs-improvement-bg";
+        
+        const nameInput = document.getElementById('s-name').value;
+        const rollInput = document.getElementById('s-roll').value;
+        const genderInput = document.getElementById('s-gender').value;
+
+        if (isPassed) {
+            const certDiv = document.getElementById('certificate-box');
+            certDiv.style.display = "block";
+            
+            let signRenderHtml = `<img src="${GITHUB_CONFIG.signatureUrl}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
+
+            certDiv.innerHTML = `
+                <div class="certificate-card">
+                    <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
+                    <h4 style="color: #2b6cb0; font-weight: bold;">ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h4>
+                    <p style="font-size:13px; color: #718096; margin-top:-5px;">सूरतगढ़, श्रीगंगानगर, राजस्थान</p>
+                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
+                    <div class="cert-name">${nameInput}</div>
+                    <p style="font-size:16px; width:85%; margin: 10px auto; line-height:1.6;">
+                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक व समय <b>${currentLiveExamDateTime}</b> को आयोजित ऑनलाइन मुख्य परीक्षा में 
+                        विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
+                    </p>
+                    <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
+                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि व समय:<br><b>${currentLiveExamDateTime}</b></div>
+                        <div style="text-align: center; min-width: 180px;">
+                            ${signRenderHtml}
+                            <div style="font-size: 9px; color: #38a169; font-weight: bold; margin-bottom: 3px;">✓ DIGITALLY VERIFIED</div>
+                            <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-size: 13px; font-weight: bold; color: #2d3748;">मार्गदर्शक हस्ताक्षर</div>
+                            <div style="font-size:11px; color:#718096;">(विनोद कुमार सहारण)</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('submit-btn').style.display = "none";
+        document.getElementById('header-bar').style.display = "none";
+        document.getElementById('print-btn').style.display = "block";
+        
+        let grade = finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
+        saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveToHistory(name, roll, subject, datetime, marks, grade, details) {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let id = Date.now();
+        history.push({ id, name, roll, subject, date: datetime, marks, grade, details });
+        localStorage.setItem('gjEduLiveTimeHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        const tbody = document.getElementById('history-rows');
+        tbody.innerHTML = "";
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई रिकॉर्ड मौजूद नहीं है।</td></tr>`;
+            return;
+        }
+        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
+        let rankMap = {};
+        let currentRank = 1;
+        sortedHistory.forEach((item, index) => {
+            if (index > 0 && item.marks < sortedHistory[index - 1].marks) { currentRank = index + 1; }
+            rankMap[item.id] = currentRank;
+        });
+        for (let i = history.length - 1; i >= 0; i--) {
+            let item = history[i];
+            let myRank = rankMap[item.id];
+            let rankBadge = myRank === 1 ? "🥇 1" : myRank === 2 ? "🥈 2" : myRank === 3 ? "🥉 3" : myRank;
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${rankBadge}</b></td>
+                    <td>${item.name}</td>
+                    <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
+                    <td><b>${item.subject}</b></td>
+                    <td style="font-size:12px;">${item.date}</td>
+                    <td><b>${item.marks}</b></td>
+                    <td><span style="font-weight:bold; color:#2b6cb0;">${item.grade}</span></td>
+                </tr>
+            `;
+        }
+    }
+
+    function viewStudentDetails(index) {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let student = history[index];
+        if (!student) return;
+        let modal = document.getElementById('details-modal');
+        let content = document.getElementById('modal-content');
+        let detailRows = "";
+        student.details.forEach(d => {
+            detailRows += `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding:8px;"><b>Q-${d.qNum}</b></td>
+                    <td style="text-align:left; font-size:13px; padding:8px;">${d.question}</td>
+                    <td style="color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
+                    <td style="color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
+                    <td style="padding:8px;">${d.status}</td>
+                </tr>
+            `;
+        });
+        content.innerHTML = `
+            <div style="margin: 10px 0; font-size: 14px; line-height: 1.6; background:#f7fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
+                👤 <b>परीक्षार्थी:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
+                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल प्राप्त अंक:</b> ${student.marks}<br>
+                ⏱️ <b>परीक्षा समय:</b> ${student.date}
+            </div>
+            <table class="summary-table" style="margin-top: 15px; width:100%;">
+                <thead><tr style="background:#edf2f7;"><th>क्र.सं.</th><th>प्रश्न</th><th>छात्र उत्तर</th><th>सही उत्तर</th><th>स्थिति</th></tr></thead>
+                <tbody>${detailRows}</tbody>
+            </table>
+        `;
+        modal.style.display = "flex";
+    }
+
+    function closeModal() { document.getElementById('details-modal').style.display = "none"; }
+
+    function downloadExcel() {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        if (history.length === 0) { alert("डेटा उपलब्ध नहीं है!"); return; }
+        let csvContent = "Rank,Student Name,Roll Number,Subject,Exam Date and Time,Marks Obtained,Grade\n";
+        history.slice().reverse().forEach((item, index) => {
+            csvContent += `${index+1},${item.name},${item.roll},${item.subject},${item.date},${item.marks},${item.grade}\n`;
+        });
+        let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Gyan_Jyoti_LiveTime_Results.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function clearHistory() {
+        if(confirm("क्या आप सारा इतिहास डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem('gjEduLiveTimeHistory');
+            loadHistory();
+        }
+    }
+</script>
+
+</body>
+</html>
