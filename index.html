@@ -622,3 +622,341 @@
 
     function startExam() {
         const name = document.getElementById('s-name').value.trim();
+        const roll = document.getElementById('s-roll').value.trim();
+        const subjectSlot = document.getElementById('s-subject').value;
+        
+        if (name === "" || roll === "") {
+            alert("⚠️ कृपया परीक्षार्थी का नाम और रोल नंबर अवश्य भरें।");
+            return;
+        }
+
+        let selectedSourceArray = [];
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = GITHUB_CONFIG.subj1.name; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = GITHUB_CONFIG.subj2.name; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = GITHUB_CONFIG.subj3.name; }
+
+        if (selectedSourceArray.length === 0) {
+            alert(`⚠️ इस विषय का डेटा अभी लोड नहीं हो पाया है!`);
+            return;
+        }
+
+        activeQuestions = shuffleQuestions([...selectedSourceArray]);
+
+        let totalExamSeconds = 0;
+        activeQuestions.forEach(q => { totalExamSeconds += q.time; });
+        timeLeft = totalExamSeconds;
+
+        document.documentElement.requestFullscreen().then(() => {
+            document.getElementById('s-name').readOnly = true;
+            document.getElementById('s-roll').readOnly = true;
+            document.getElementById('s-subject').disabled = true;
+            document.getElementById('s-gender').disabled = true;
+
+            document.getElementById('start-btn').style.display = "none";
+            document.getElementById('header-bar').style.display = "block";
+            document.getElementById('quiz-form').style.display = "block";
+            document.getElementById('submit-btn').style.display = "block";
+            
+            examActive = true;
+            cheatCount = 0;
+
+            renderQuestions();
+            startTimer();
+        }).catch(() => {
+            alert("❌ परीक्षा प्रारंभ करने के लिए फुलस्क्रीन की अनुमति आवश्यक है।");
+        });
+    }
+
+    function renderQuestions() {
+        const quizForm = document.getElementById('quiz-form');
+        quizForm.innerHTML = "";
+        
+        activeQuestions.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'question-block';
+            
+            let optionsHtml = '';
+            item.options.forEach((opt, optIndex) => {
+                let letter = String.fromCharCode(65 + optIndex); 
+                optionsHtml += `
+                    <div class="option-item">
+                        <input type="radio" name="q-${index}" id="q-${index}-o-${optIndex}" value="${opt}" onchange="updateProgress()">
+                        <label for="q-${index}-o-${optIndex}"><b>${letter})</b> ${opt}</label>
+                    </div>
+                `;
+            });
+
+            optionsHtml += `
+                <div class="option-item skip-opt-style">
+                    <input type="radio" name="q-${index}" id="q-${index}-o-skip" value="__SKIP__" onchange="updateProgress()">
+                    <label for="q-${index}-o-skip"><b>E)</b> प्रश्न स्किप करें (Skip Question)</label>
+                </div>
+            `;
+
+            div.innerHTML = `
+                <span class="marks-tag">समय: ${item.time}s | सही +10 | गलत -3</span>
+                <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
+                <div class="options-container">
+                    ${optionsHtml}
+                </div>
+            `;
+            quizForm.appendChild(div);
+        });
+    }
+
+    function updateProgress() {
+        let filledCount = 0;
+        activeQuestions.forEach((_, index) => {
+            if(document.querySelector(`input[name="q-${index}"]:checked`)) { filledCount++; }
+        });
+        const percentage = (filledCount / activeQuestions.length) * 100;
+        document.getElementById('p-bar').style.width = percentage + "%";
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त!";
+                if(!isSubmitted) checkAnswers(true);
+            } else {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('timer-display').innerHTML = `⏱️ शेष समय: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} मिनट`;
+            }
+        }, 1000);
+    }
+
+    function checkAnswers(isAutoSubmit) {
+        if(isSubmitted) return;
+
+        clearInterval(timerInterval);
+        isSubmitted = true;
+        examActive = false;
+
+        if (document.fullscreenElement) { document.exitFullscreen(); }
+
+        let now = new Date();
+        let day = String(now.getDate()).padStart(2, '0');
+        let month = String(now.getMonth() + 1).padStart(2, '0');
+        let year = now.getFullYear();
+        let hours = now.getHours();
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        let hoursStr = String(hours).padStart(2, '0');
+        let currentLiveExamDateTime = `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
+
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let totalSkipped = 0;
+        let calculatedMarks = 0;
+        let tableRowsHtml = ""; 
+        let detailedQuestionLog = []; 
+
+        activeQuestions.forEach((item, index) => {
+            const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
+            let statusText = "";
+            let selectedValue = "नहीं दिया";
+            
+            if (selectedOpt) {
+                selectedValue = selectedOpt.value;
+                if (selectedValue === "__SKIP__") {
+                    totalSkipped++;
+                    statusText = "<span class='status-skipped'>⚪ स्किप किया (0)</span>";
+                    selectedValue = "स्किप (E)";
+                } else if (selectedValue === item.answer) {
+                    totalCorrect++;
+                    calculatedMarks += 10;
+                    statusText = "<span class='status-correct'>✅ सही (+10)</span>";
+                } else {
+                    totalWrong++;
+                    calculatedMarks -= 3;
+                    statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
+                }
+            } else {
+                totalSkipped++;
+                statusText = "<span class='status-skipped'>⚪ अनुत्तरित / स्किप (0)</span>";
+            }
+
+            tableRowsHtml += `<tr><td><b>प्रश्न ${index + 1}</b></td><td>${statusText}</td></tr>`;
+
+            detailedQuestionLog.push({
+                qNum: index + 1,
+                question: item.question,
+                selected: selectedValue,
+                correct: item.answer,
+                status: statusText
+            });
+        });
+
+        let finalMarks = Math.max(0, calculatedMarks);
+        document.getElementById('quiz-form').style.display = "none";
+
+        const resultDiv = document.getElementById('final-result');
+        resultDiv.style.display = "block";
+        
+        resultDiv.innerHTML = `
+            <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
+            <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="font-size: 14px; color:#718096;">⏱️ परीक्षा समाप्ति का समय: <b>${currentLiveExamDateTime}</b></span><br>
+                <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong} | स्किप: ${totalSkipped}</span><br>
+                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
+            </div>
+            <table class="summary-table">
+                <thead><tr><th>प्रश्न संख्या</th><th>स्थिति (Status)</th></tr></thead>
+                <tbody>${tableRowsHtml}</tbody>
+            </table>
+        `;
+        
+        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4); 
+        resultDiv.className = isPassed ? "result correct-bg" : "result needs-improvement-bg";
+        
+        const nameInput = document.getElementById('s-name').value;
+        const rollInput = document.getElementById('s-roll').value;
+        const genderInput = document.getElementById('s-gender').value;
+
+        if (isPassed) {
+            const certDiv = document.getElementById('certificate-box');
+            certDiv.style.display = "block";
+            
+            let signRenderHtml = `<img src="${GITHUB_CONFIG.signatureUrl}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
+
+            certDiv.innerHTML = `
+                <div class="certificate-card">
+                    <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
+                    <h4 style="color: #2b6cb0; font-weight: bold;">ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h4>
+                    <p style="font-size:13px; color: #718096; margin-top:-5px;">सूरतगढ़, श्रीगंगानगर, राजस्थान</p>
+                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
+                    <div class="cert-name">${nameInput}</div>
+                    <p style="font-size:16px; width:85%; margin: 10px auto; line-height:1.6;">
+                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक व समय <b>${currentLiveExamDateTime}</b> को आयोजित ऑनलाइन मुख्य परीक्षा में 
+                        विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
+                    </p>
+                    <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
+                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि व समय:<br><b>${currentLiveExamDateTime}</b></div>
+                        <div style="text-align: center; min-width: 180px;">
+                            ${signRenderHtml}
+                            <div style="font-size: 9px; color: #38a169; font-weight: bold; margin-bottom: 3px;">✓ DIGITALLY VERIFIED</div>
+                            <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-size: 13px; font-weight: bold; color: #2d3748;">मार्गदर्शक हस्ताक्षर</div>
+                            <div style="font-size:11px; color:#718096;">(विनोद कुमार सहारण)</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('submit-btn').style.display = "none";
+        document.getElementById('header-bar').style.display = "none";
+        document.getElementById('print-btn').style.display = "block";
+        
+        let grade = finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
+        saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveToHistory(name, roll, subject, datetime, marks, grade, details) {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let id = Date.now();
+        history.push({ id, name, roll, subject, date: datetime, marks, grade, details });
+        localStorage.setItem('gjEduLiveTimeHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        const tbody = document.getElementById('history-rows');
+        tbody.innerHTML = "";
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई रिकॉर्ड मौजूद नहीं है।</td></tr>`;
+            return;
+        }
+        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
+        let rankMap = {};
+        let currentRank = 1;
+        sortedHistory.forEach((item, index) => {
+            if (index > 0 && item.marks < sortedHistory[index - 1].marks) { currentRank = index + 1; }
+            rankMap[item.id] = currentRank;
+        });
+        for (let i = history.length - 1; i >= 0; i--) {
+            let item = history[i];
+            let myRank = rankMap[item.id];
+            let rankBadge = myRank === 1 ? "🥇 1" : myRank === 2 ? "🥈 2" : myRank === 3 ? "🥉 3" : myRank;
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${rankBadge}</b></td>
+                    <td>${item.name}</td>
+                    <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
+                    <td><b>${item.subject}</b></td>
+                    <td style="font-size:12px;">${item.date}</td>
+                    <td><b>${item.marks}</b></td>
+                    <td><span style="font-weight:bold; color:#2b6cb0;">${item.grade}</span></td>
+                </tr>
+            `;
+        }
+    }
+
+    function viewStudentDetails(index) {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let student = history[index];
+        if (!student) return;
+        let modal = document.getElementById('details-modal');
+        let content = document.getElementById('modal-content');
+        let detailRows = "";
+        student.details.forEach(d => {
+            detailRows += `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding:8px;"><b>Q-${d.qNum}</b></td>
+                    <td style="text-align:left; font-size:13px; padding:8px;">${d.question}</td>
+                    <td style="color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
+                    <td style="color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
+                    <td style="padding:8px;">${d.status}</td>
+                </tr>
+            `;
+        });
+        content.innerHTML = `
+            <div style="margin: 10px 0; font-size: 14px; line-height: 1.6; background:#f7fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
+                👤 <b>परीक्षार्थी:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
+                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल प्राप्त अंक:</b> ${student.marks}<br>
+                ⏱️ <b>परीक्षा समय:</b> ${student.date}
+            </div>
+            <table class="summary-table" style="margin-top: 15px; width:100%;">
+                <thead><tr style="background:#edf2f7;"><th>क्र.सं.</th><th>प्रश्न</th><th>छात्र उत्तर</th><th>सही उत्तर</th><th>स्थिति</th></tr></thead>
+                <tbody>${detailRows}</tbody>
+            </table>
+        `;
+        modal.style.display = "flex";
+    }
+
+    function closeModal() { document.getElementById('details-modal').style.display = "none"; }
+
+    function downloadExcel() {
+        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        if (history.length === 0) { alert("डेटा उपलब्ध नहीं है!"); return; }
+        let csvContent = "Rank,Student Name,Roll Number,Subject,Exam Date and Time,Marks Obtained,Grade\n";
+        history.slice().reverse().forEach((item, index) => {
+            csvContent += `${index+1},${item.name},${item.roll},${item.subject},${item.date},${item.marks},${item.grade}\n`;
+        });
+        let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Gyan_Jyoti_LiveTime_Results.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function clearHistory() {
+        if(confirm("क्या आप सारा इतिहास डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem('gjEduLiveTimeHistory');
+            loadHistory();
+        }
+    }
+</script>
+
+</body>
+</html>
