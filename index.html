@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>एकीकृत डिजिटल परीक्षा पोर्टल - प्रो (अल्ट्रा सिक्योर)</title>
+    <title>ज्ञान ज्योति शिक्षण संस्थान - 3 सब्जेक्ट परीक्षा पोर्टल</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -14,7 +14,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* ऑफलाइन नकल रोकने के लिए टेक्स्ट सिलेक्शन बंद */
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -32,29 +31,27 @@
         h1 {
             text-align: center;
             color: #2b6cb0;
-            font-size: 28px;
+            font-size: 26px;
             margin-bottom: 5px;
         }
         .subtitle {
             text-align: center;
-            color: #718096;
+            color: #4a5568;
             margin-bottom: 25px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
         }
         .rules-tag {
             background: #fff5f5;
             border: 1px solid #fed7d7;
             color: #c53030;
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             margin-bottom: 20px;
-            font-weight: bold;
-            text-align: center;
+            line-height: 1.6;
         }
         
-        /* टाइमर और प्रोग्रेस बार */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -93,7 +90,6 @@
             transition: width 0.3s ease;
         }
 
-        /* छात्र विवरण फॉर्म */
         .student-info {
             background: #f7fafc;
             padding: 20px;
@@ -130,7 +126,24 @@
             background: white;
         }
 
-        /* प्रश्न ब्लॉक */
+        /* शिक्षक फाइल अपलोड सेक्शन */
+        .csv-setup-box {
+            grid-column: span 2; 
+            background: #ebf8ff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #bee3f8;
+            margin-top: 5px;
+        }
+        .csv-row {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .csv-row:last-child { margin-bottom: 0; }
+
         .question-block {
             background: #f8fafc;
             padding: 20px;
@@ -172,6 +185,13 @@
             background: #ebf8ff;
             border-color: #bee3f8;
         }
+        .option-item.skip-opt-style {
+            background: #fffaf0;
+            border-color: #feebc8;
+        }
+        .option-item.skip-opt-style:hover {
+            background: #feebc8;
+        }
         .option-item input[type="radio"] {
             margin-right: 12px;
             transform: scale(1.3);
@@ -183,7 +203,6 @@
             width: 100%;
         }
 
-        /* बटन्स */
         .btn {
             display: block;
             width: 100%;
@@ -230,8 +249,8 @@
         }
         .status-correct { color: #38a169; font-weight: bold; }
         .status-wrong { color: #e53e3e; font-weight: bold; }
+        .status-skipped { color: #dd6b20; font-weight: bold; }
 
-        /* डिजिटल सर्टिफिकेट डिज़ाइन */
         .certificate-card {
             margin-top: 30px;
             background: #fff;
@@ -242,11 +261,17 @@
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 28px; margin-top: 0; }
-        .certificate-card h4 { color: #4a5568; letter-spacing: 2px; text-transform: uppercase; margin: 10px 0; }
+        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 26px; margin-top: 0; }
+        .certificate-card h4 { color: #4a5568; letter-spacing: 1px; margin: 10px 0; }
         .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
         
-        /* टीचर डैशबोर्ड */
+        .uploaded-sign-img {
+            max-height: 55px;
+            max-width: 160px;
+            display: block;
+            margin: 0 auto 2px auto;
+        }
+
         .dashboard-container {
             margin-top: 40px;
             background: white;
@@ -277,7 +302,6 @@
             text-decoration: underline;
             cursor: pointer;
         }
-        .roll-link:hover { color: #2b6cb0; }
         
         .action-bar {
             margin-bottom: 15px;
@@ -297,7 +321,6 @@
         .clear-btn { background: #e53e3e; }
         .excel-btn { background: #3182ce; }
 
-        /* पॉप-अप (Modal) स्टाइल */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -330,11 +353,10 @@
             color: #718096;
         }
 
-        /* प्रिंट सेटिंग्स */
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .csv-setup-box { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
             .certificate-card { border: 8px double #b7791f; page-break-before: always; }
@@ -344,12 +366,15 @@
 <body>
 
 <div class="quiz-container">
-    <h1>ज्ञान ज्योति शिक्षण संस्थान ( ऑनलाइन ),सूरतगढ़, श्रीगंगानगर,राजस्थान</h1>
-    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल (अल्ट्रा सिक्योर मोड)</div>
+    <h1>ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h1>
+    <div class="subtitle">📍 सूरतगढ़, श्रीगंगानगर, राजस्थान</div>
     
     <div class="rules-tag">
-        ⚠️ नियम: सही उत्तर = +10 | गलत = -3 अंक | 🔒 ऑफलाइन व ऑनलाइन हाई-सिक्योरिटी लॉक चालू है। <br>
-        (राइट-क्लिक, कॉपी-पेस्ट, फुलस्क्रीन छोड़ना या विंडो बदलना सख्त मना है)
+        📋 <b>परीक्षा के नियम एवं निर्देश:</b><br>
+        1. सभी प्रश्न करने अनिवार्य हैं।<br>
+        2. प्रत्येक प्रश्न में पांचवां विकल्प (E) प्रश्न को स्किप करने के लिए दिया गया है। यदि आप उत्तर नहीं जानते, तो उसे स्किप कर सकते हैं।<br>
+        3. सही उत्तर मिलने पर +10 अंक दिए जाएंगे, गलत उत्तर पर -3 अंक की कटौती होगी। प्रश्न स्किप करने पर 0 अंक मिलेगा।<br>
+        4. ऑफलाइन व ऑनलाइन नक़ल रोकने हेतु सुरक्षा प्रणाली सक्रिय है। विंडो बदलने या फुलस्क्रीन से बाहर जाने पर परीक्षा रद्द हो जाएगी।
     </div>
     
     <div class="sticky-header" id="header-bar">
@@ -364,28 +389,54 @@
         <h3>📋 परीक्षा फॉर्म (Exam Registration)</h3>
         <div class="info-grid">
             <div class="info-group">
-                <label>छात्र/छात्रा का नाम:</label>
-                <input type="text" id="s-name" placeholder="पूरा नाम लिखें">
+                <label>छात्र या छात्रा चुनें:</label>
+                <select id="s-gender">
+                    <option value="छात्र">छात्र (Boy)</option>
+                    <option value="छात्रा">छात्रा (Girl)</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>परीक्षार्थी का पूरा नाम:</label>
+                <input type="text" id="s-name" placeholder="अपना नाम लिखें">
             </div>
             <div class="info-group">
                 <label>अनुक्रमांक (Roll No):</label>
                 <input type="text" id="s-roll" placeholder="रोल नंबर लिखें">
             </div>
             <div class="info-group">
-                <label>परीक्षा का विषय (Subject):</label>
+                <label>परीक्षा का विषय (Select Subject):</label>
                 <select id="s-subject">
-                    <option value="math">📐 गणित (Mathematics)</option>
-                    <option value="hindi">📝 हिंदी (Hindi Grammar)</option>
-                    <option value="science">🔬 विज्ञान (Science)</option>
+                    <option value="1">गणित (Mathematics)</option>
+                    <option value="2">विज्ञान (Science)</option>
+                    <option value="3">हिंदी (Hindi)</option>
                 </select>
             </div>
             <div class="info-group">
                 <label>दिनांक (Date):</label>
                 <input type="date" id="s-date">
             </div>
-            <div class="info-group" style="grid-column: span 2;">
-                <label>प्रधानाचार्य का नाम (डिजिटल हस्ताक्षर हेतु):</label>
-                <input type="text" id="p-name" value="डॉ. आर. के. स्वामी" placeholder="विनोद कुमार सहारण ">
+            <div class="info-group">
+                <label>मार्गदर्शक के हस्ताक्षर इमेज अपलोड करें:</label>
+                <input type="file" id="p-sign-file" accept="image/*">
+            </div>
+
+            <div class="csv-setup-box">
+                <strong style="color:#2b6cb0; display:block; margin-bottom:10px; font-size:14px;">⚙️ शिक्षक सेटअप: विषय के नाम बदलें और उनकी CSV फाइल अपलोड करें:</strong>
+                
+                <div class="csv-row">
+                    <input type="text" id="subj1-name" value="गणित (Mathematics)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
+                    <input type="file" id="csv-file-1" accept=".csv" style="font-size:12px;">
+                </div>
+                
+                <div class="csv-row">
+                    <input type="text" id="subj2-name" value="विज्ञान (Science)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
+                    <input type="file" id="csv-file-2" accept=".csv" style="font-size:12px;">
+                </div>
+                
+                <div class="csv-row">
+                    <input type="text" id="subj3-name" value="हिंदी (Hindi)" oninput="syncDropdown()" style="padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px;">
+                    <input type="file" id="csv-file-3" accept=".csv" style="font-size:12px;">
+                </div>
             </div>
         </div>
     </div>
@@ -395,11 +446,9 @@
     <div id="quiz-form" style="display:none;"></div>
     
     <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
-    
     <div id="final-result" class="result" style="display:none;"></div>
     
     <div id="certificate-box" style="display:none;"></div>
-    
     <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट व सर्टिफिकेट प्रिंट करें</button>
 </div>
 
@@ -408,13 +457,13 @@
         <button class="top-btn excel-btn" onclick="downloadExcel()">📥 Excel डाउनलोड करें</button>
         <button class="top-btn clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
     </div>
-    <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम एवं रैंक सूची)</h3>
+    <h3>📜 परिणाम सूची एवं छात्र रिकॉर्ड</h3>
     <table class="dashboard-table">
         <thead>
             <tr>
-                <th>रैंक (Rank)</th>
+                <th>रैंक</th>
                 <th>नाम</th>
-                <th>रोल नंबर (विवरण लिंक)</th>
+                <th>रोल नंबर</th>
                 <th>विषय</th>
                 <th>तारीख</th>
                 <th>प्राप्तांक</th>
@@ -428,82 +477,84 @@
 <div class="modal-overlay" id="details-modal">
     <div class="modal-box">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र परीक्षा की विस्तृत उत्तर कुंजी (Answer Sheet)</h3>
+        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र विस्तृत उत्तर कुंजी</h3>
         <div id="modal-content"></div>
     </div>
 </div>
 
 <script>
-    const masterQuizData = {
-        "math": [
-            {"question": "5 + 7 × 2 का मान क्या होगा?", "options": ["24", "19", "14", "20"], "answer": "19"},
-            {"question": "सबसे छोटी अभाज्य संख्या (Prime Number) कौन सी है?", "options": ["0", "1", "2", "3"], "answer": "2"},
-            {"question": "एक त्रिभुज (Triangle) के तीनों आंतरिक कोणों का योग कितना होता है?", "options": ["90°", "180°", "360°", "270°"], "answer": "180°"},
-            {"question": "वर्ग (Square) का क्षेत्रफल ज्ञात करने का सही सूत्र क्या है?", "options": ["भुजा × भुजा", "2 × भुजा", "लंबाई × चौड़ाई", "भुजा × 4"], "answer": "भुजा × भुजा"},
-            {"question": "यदि किसी वृत्त की त्रिज्या (Radius) 7 सेमी है, तो उसका व्यास (Diameter) क्या होगा?", "options": ["14 सेमी", "21 सेमी", "28 सेमी", "3.5 सेमी"], "answer": "14 सेमी"},
-            {"question": "100 का 25% कितना होगा?", "options": ["10", "25", "50", "75"], "answer": "25"},
-            {"question": "संख्या 45 में अंक '4' का स्थानीय मान (Place Value) क्या है?", "options": ["4", "40", "400", "45"], "answer": "40"},
-            {"question": "आयत (Rectangle) का परिमाप (Perimeter) ज्ञात करने का सूत्र क्या है?", "options": ["2 × (लंबाई + चौड़ाई)", "लंबाई × चौड़ाई", "4 × भुजा", "लंबाई + चौड़ाई"], "answer": "2 × (लंबाई + चौड़ाई)"},
-            {"question": "-5 और +8 का योग (जोड़) कितना होगा?", "options": ["-13", "+3", "-3", "+13"], "answer": "+3"},
-            {"question": "1/2 और 1/4 को जोड़ने पर क्या प्राप्त होगा?", "options": ["2/6", "3/4", "1/6", "2/4"], "answer": "3/4"}
-        ],
-        "hindi": [
-            {"question": "'अमृत' का सही विलोम शब्द क्या होगा?", "options": ["पियूष", "विष", "जल", "सुधा"], "answer": "विष"},
-            {"question": "'सूरज' का पर्यायवाची शब्द निम्नलिखित में से कौन सा है?", "options": ["निशाकर", "सुधाकर", "सूर्य", "राकेश"], "answer": "सूर्य"},
-            {"question": "निम्नलिखित में से शुद्ध वर्तनी (सही शब्द) चुनिए:", "options": ["कवीत्री", "कवयित्री", "कवित्री", "कवीयित्री"], "answer": "कवयित्री"},
-            {"question": "'अंगूठा दिखाना' मुहावरे का सही अर्थ क्या है?", "options": ["मदद करना", "साफ़ मना करना", "चिढ़ाना", "आदर करना"], "answer": "साफ़ मना करना"},
-            {"question": "संज्ञा के स्थान पर प्रयुक्त होने वाले शब्दों को क्या कहते हैं?", "options": ["सर्वनाम", "विशेषण", "क्रिया", "अव्यय"], "answer": "सर्वनाम"},
-            {"question": "'हिमालय' शब्द का सही संधि-विच्छेद क्या होगा?", "options": ["हिम + आलय", "हिमा + लय", "हि + मालय", "हिम + लय"], "answer": "हिम + आलय"},
-            {"question": "हिंदी भाषा को किस लिपि में लिखा जाता है?", "options": ["रोमन", "गुरुमुखी", "देवनागरी", "फारसी"], "answer": "देवनागरी"},
-            {"question": "'लड़का' शब्द का सही बहुवचन रूप क्या होगा?", "options": ["लड़कों", "लड़के", "लड़कियाँ", "लड़कें"], "answer": "लड़के"},
-            {"question": "जो सब कुछ जानता हो, वाक्यांश के लिए एक शब्द क्या होगा?", "options": ["अल्पज्ञ", "सर्वज्ञ", "विद्वान", "अज्ञानी"], "answer": "सर्वज्ञ"},
-            {"question": "'रात' शब्द का तत्सम रूप क्या होगा?", "options": ["रात्रि", "निशा", "अंधकार", "सांझ"], "answer": "रात्रि"}
-        ],
-        "science": [
-            {"question": "मानव आँख की रेटिना पर बनने वाला प्रतिबिंब (Image) कैसा होता है?", "options": ["वास्तविक और उल्टा", "आभासी और सीधा", "वास्तविक और सीधा", "आभासी और उल्टा"], "answer": "वास्तविक और उल्टा"},
-            {"question": "शुद्ध जल (Pure Water) का pH मान कितना होता है?", "options": ["5", "6", "7", "8"], "answer": "7"},
-            {"question": "मानव शरीर की सबसे लंबी या बड़ी हड्डी कौन सी है?", "options": ["स्टेप्स", "फीमर (जांघ की हड्डी)", "रीढ़ की हड्डी", "हाथ की हड्डी"], "answer": "फीमर (जांघ की हड्डी)"},
-            {"question": "विद्युत धारा (Electric Current) को मापने का मात्रक क्या है?", "options": ["वोल्ट", "वाट", "एम्पियर", "ओम"], "answer": "एम्पियर"},
-            {"question": "पौधों में पत्तियों का हरा रंग निम्नलिखित में से किसके कारण होता है?", "options": ["क्लोरोफिल", "हीमोग्लोबिन", "कैरोटीन", "जाइलम"], "answer": "क्लोरोफिल"},
-            {"question": "हमारे सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", "options": ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], "answer": "बृहस्पति"},
-            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अल्बर्ट आइंस्टीन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
-            {"question": "विटामिन सी (Vitamin C) की कमी से कौन सा रोग होता है?", "options": ["रिकेट्स", "रतौंधी", "बेरी-बेरी", "स्कर्वी"], "answer": "स्कर्वी"},
-            {"question": "वायुमंडल में सबसे अधिक मात्रा (78%) में पाई जाने वाली गैस कौन सी है?", "options": ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "आर्गन"], "answer": "नाइट्रोजन"},
-            {"question": "पानी (H₂O) में हाइड्रोजन और ऑक्सीजन के परमाणुओं का अनुपात क्या होता है?", "options": ["2:1", "1:2", "8:1", "1:8"], "answer": "2:1"}
-        ]
-    };
-
     let activeQuestions = [];
-    let selectedSubjectName = "";
     let timeLeft = 1200; 
     let timerInterval;
     let isSubmitted = false;
     let examActive = false;
     let cheatCount = 0;
+    let signImgData = ""; 
+
+    // 3 अलग-अलग विषयों के प्रश्नों को स्टोर करने के लिए एरे
+    let dataSubj1 = [];
+    let dataSubj2 = [];
+    let dataSubj3 = [];
+    let selectedSubjectName = "";
 
     document.getElementById('s-date').valueAsDate = new Date();
+    syncDropdown();
     loadHistory();
 
-    // 🔒 [अल्ट्रा-सुरक्षा] राइट क्लिक, कॉपी, कट, पेस्ट पूरी तरह ब्लॉक
+    // ✍️ विषय नामों को ड्रॉपडाउन मेनू के साथ सिंक करना
+    function syncDropdown() {
+        const s1 = document.getElementById('subj1-name').value || "विषय 1";
+        const s2 = document.getElementById('subj2-name').value || "विषय 2";
+        const s3 = document.getElementById('subj3-name').value || "विषय 3";
+        
+        const select = document.getElementById('s-subject');
+        select.options[0].text = s1;
+        select.options[1].text = s2;
+        select.options[2].text = s3;
+    }
+
+    // 📂 तीनों CSV फ़ाइलों को अलग-अलग रीड करने के लिसनर्स
+    document.getElementById('csv-file-1').addEventListener('change', e => { readCSVFile(e.target.files[0], 1); });
+    document.getElementById('csv-file-2').addEventListener('change', e => { readCSVFile(e.target.files[0], 2); });
+    document.getElementById('csv-file-3').addEventListener('change', e => { readCSVFile(e.target.files[0], 3); });
+
+    function readCSVFile(file, slotNum) {
+        if(!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let parsed = parseCSVText(e.target.result);
+            if(slotNum === 1) dataSubj1 = parsed;
+            if(slotNum === 2) dataSubj2 = parsed;
+            if(slotNum === 3) dataSubj3 = parsed;
+        };
+        reader.readAsText(file);
+    }
+
+    // ✍️ मार्गदर्शक सिग्नेचर इमेज लोडर
+    document.getElementById('p-sign-file').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if(file) {
+            let reader = new FileReader();
+            reader.onload = function(event) { signImgData = event.target.result; };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 🔒 एंटी-चीट सुरक्षा प्रणाली
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('paste', e => { if(examActive) e.preventDefault(); });
 
-    // 🔒 [अल्ट्रा-सुरक्षा] इंसपेक्ट एलिमेंट (F12) और सोर्स कोड शॉर्टकट ब्लॉक
     document.addEventListener('keydown', e => {
         if (examActive) {
-            if (e.key === "F12" || 
-                (e.ctrlKey && e.shiftKey && e.key === "I") || 
-                (e.ctrlKey && e.key === "u") || 
-                (e.ctrlKey && e.key === "U")) {
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I") || (e.ctrlKey && e.key === "u") || (e.ctrlKey && e.key === "U")) {
                 e.preventDefault();
-                triggerSecurityViolation("सुरक्षित कीबोर्ड शॉर्टकट दबाने का प्रयास किया गया!");
+                triggerSecurityViolation("कीबोर्ड शॉर्टकट लॉक का उल्लंघन!");
             }
         }
     });
 
-    // 🔒 [अल्ट्रा-सुरक्षा] ऑनलाइन टैब बदलना या ऑफलाइन अन्य सॉफ्टवेयर/नोट्स खोलना डिटेक्ट करना
     document.addEventListener('visibilitychange', () => {
         if (examActive && !isSubmitted && document.hidden) {
             triggerSecurityViolation("ब्राउज़र टैब बदलने का प्रयास किया गया!");
@@ -512,14 +563,13 @@
 
     window.addEventListener('blur', () => {
         if (examActive && !isSubmitted) {
-            triggerSecurityViolation("लोकल सॉफ्टवेयर (MS Word/PDF नोट्स) या बैकग्राउंड ऐप खोलने का प्रयास!");
+            triggerSecurityViolation("लोकल ऑफलाइन फाइल या बैकग्राउंड नोट्स खोलने का प्रयास!");
         }
     });
 
-    // 🔒 [अल्ट्रा-सुरक्षा] फुलस्क्रीन से बाहर निकलने पर उल्लंघन दर्ज करना
     document.addEventListener('fullscreenchange', () => {
         if (examActive && !document.fullscreenElement && !isSubmitted) {
-            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड से बाहर निकलने का प्रयास!");
+            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड को छोड़ने का प्रयास!");
         }
     });
 
@@ -527,45 +577,83 @@
         cheatCount++;
         document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/3)`;
         if (cheatCount >= 3) {
-            alert(`🚨 गंभीर सुरक्षा उल्लंघन!\nकारण: ${reason}\n\nआपकी परीक्षा तुरंत स्वतः समाप्त की जा रही है।`);
+            alert(`🚨 गंभीर सुरक्षा उल्लंघन! परीक्षा स्वतः समाप्त की जा रही है।`);
             checkAnswers(true);
         } else {
-            alert(`⚠️ चेतावनी ${cheatCount}: ${reason}\n\nकृपया परीक्षा स्क्रीन पर ध्यान दें। 3 चेतावनियों के बाद पेपर लॉक हो जाएगा।`);
-            // फुलस्क्रीन दोबारा लागू करने की कोशिश
-            forceFullscreen();
+            alert(`⚠️ चेतावनी ${cheatCount}: ${reason}\n3 चेतावनियों के बाद पेपर स्वतः लॉक हो जाएगा।`);
+            if (!document.fullscreenElement && examActive) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
         }
     }
 
-    function forceFullscreen() {
-        if (!document.fullscreenElement && examActive) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.log("फुलस्क्रीन मोड एक्टिवेट करने में त्रुटि।");
-            });
+    // 🎲 रैंडम शफल एल्गोरिथ्म (Fisher-Yates)
+    function shuffleQuestions(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
+        return array;
+    }
+
+    // 📊 CSV पार्सर
+    function parseCSVText(text) {
+        let lines = text.split('\n');
+        let list = [];
+        for (let i = 1; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+            let parts = line.split(',');
+            if (parts.length >= 6) {
+                list.push({
+                    question: parts[0].trim(),
+                    options: [parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()],
+                    answer: parts[5].trim()
+                });
+            }
+        }
+        return list;
     }
 
     function startExam() {
         const name = document.getElementById('s-name').value.trim();
         const roll = document.getElementById('s-roll').value.trim();
-        const subjectKey = document.getElementById('s-subject').value;
+        const subjectSlot = document.getElementById('s-subject').value;
         
         if (name === "" || roll === "") {
-            alert("⚠️ कृपया परीक्षा शुरू करने से पहले 'नाम' and 'रोल नंबर' जरूर भरें।");
+            alert("⚠️ कृपया परीक्षार्थी का नाम और रोल नंबर अवश्य भरें।");
             return;
         }
 
-        // फुलस्क्रीन एक्टिवेट करना (ऑफलाइन नकल रोकने का सबसे तगड़ा तरीका)
-        document.documentElement.requestFullscreen().then(() => {
-            activeQuestions = masterQuizData[subjectKey];
-            const subjectTextMap = { "math": "गणित", "hindi": "हिंदी", "science": "विज्ञान" };
-            selectedSubjectName = subjectTextMap[subjectKey];
+        let selectedSourceArray = [];
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = document.getElementById('subj1-name').value; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = document.getElementById('subj2-name').value; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = document.getElementById('subj3-name').value; }
 
+        if (selectedSourceArray.length === 0) {
+            alert(`⚠️ इस विषय (${selectedSubjectName}) की CSV फ़ाइल शिक्षक सेटअप में अपलोड नहीं की गई है!`);
+            return;
+        }
+
+        // 🎲 प्रश्नों को रैंडमाइज (शफल) करना ताकि किसी के पास एक जैसा पेपर न आए
+        activeQuestions = shuffleQuestions([...selectedSourceArray]);
+
+        document.documentElement.requestFullscreen().then(() => {
             document.getElementById('s-name').readOnly = true;
             document.getElementById('s-roll').readOnly = true;
             document.getElementById('s-subject').disabled = true;
-            document.getElementById('p-name').readOnly = true;
-            document.getElementById('start-btn').style.display = "none";
+            document.getElementById('s-gender').disabled = true;
+            document.getElementById('p-sign-file').disabled = true;
             
+            // शिक्षक इनपुट लॉक करना
+            document.getElementById('subj1-name').disabled = true;
+            document.getElementById('subj2-name').disabled = true;
+            document.getElementById('subj3-name').disabled = true;
+            document.getElementById('csv-file-1').disabled = true;
+            document.getElementById('csv-file-2').disabled = true;
+            document.getElementById('csv-file-3').disabled = true;
+
+            document.getElementById('start-btn').style.display = "none";
             document.getElementById('header-bar').style.display = "block";
             document.getElementById('quiz-form').style.display = "block";
             document.getElementById('submit-btn').style.display = "block";
@@ -575,8 +663,8 @@
 
             renderQuestions();
             startTimer();
-        }).catch(err => {
-            alert("❌ परीक्षा शुरू करने के लिए फुलस्क्रीन अनुमति आवश्यक है। कृपया दोबारा प्रयास करें।");
+        }).catch(() => {
+            alert("❌ परीक्षा प्रारंभ करने के लिए फुलस्क्रीन की अनुमति आवश्यक है।");
         });
     }
 
@@ -590,16 +678,25 @@
             
             let optionsHtml = '';
             item.options.forEach((opt, optIndex) => {
+                let letter = String.fromCharCode(65 + optIndex); // A, B, C, D
                 optionsHtml += `
                     <div class="option-item">
                         <input type="radio" name="q-${index}" id="q-${index}-o-${optIndex}" value="${opt}" onchange="updateProgress()">
-                        <label for="q-${index}-o-${optIndex}">${opt}</label>
+                        <label for="q-${index}-o-${optIndex}"><b>${letter})</b> ${opt}</label>
                     </div>
                 `;
             });
 
+            // 5वां विकल्प (E) स्किप करने के लिए स्वतः जोड़ना
+            optionsHtml += `
+                <div class="option-item skip-opt-style">
+                    <input type="radio" name="q-${index}" id="q-${index}-o-skip" value="__SKIP__" onchange="updateProgress()">
+                    <label for="q-${index}-o-skip"><b>E)</b> प्रश्न स्किप करें (Skip Question)</label>
+                </div>
+            `;
+
             div.innerHTML = `
-                <span class="marks-tag">सही +10 | गलत -3</span>
+                <span class="marks-tag">सही +10 | गलत -3 | स्किप 0</span>
                 <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
                 <div class="options-container">
                     ${optionsHtml}
@@ -612,9 +709,7 @@
     function updateProgress() {
         let filledCount = 0;
         activeQuestions.forEach((_, index) => {
-            if(document.querySelector(`input[name="q-${index}"]:checked`)) {
-                filledCount++;
-            }
+            if(document.querySelector(`input[name="q-${index}"]:checked`)) { filledCount++; }
         });
         const percentage = (filledCount / activeQuestions.length) * 100;
         document.getElementById('p-bar').style.width = percentage + "%";
@@ -624,7 +719,7 @@
         timerInterval = setInterval(() => {
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त हो गया!";
+                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त!";
                 if(!isSubmitted) checkAnswers(true);
             } else {
                 timeLeft--;
@@ -642,27 +737,27 @@
         isSubmitted = true;
         examActive = false;
 
-        // फुलस्क्रीन मोड से बाहर आना
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        }
+        if (document.fullscreenElement) { document.exitFullscreen(); }
 
         let totalCorrect = 0;
         let totalWrong = 0;
-        let totalUnanswered = 0;
+        let totalSkipped = 0;
         let calculatedMarks = 0;
         let tableRowsHtml = ""; 
         let detailedQuestionLog = []; 
 
         activeQuestions.forEach((item, index) => {
             const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
-            
             let statusText = "";
             let selectedValue = "नहीं दिया";
             
             if (selectedOpt) {
                 selectedValue = selectedOpt.value;
-                if (selectedValue === item.answer) {
+                if (selectedValue === "__SKIP__") {
+                    totalSkipped++;
+                    statusText = "<span class='status-skipped'>⚪ स्किप किया (0)</span>";
+                    selectedValue = "स्किप (E)";
+                } else if (selectedValue === item.answer) {
                     totalCorrect++;
                     calculatedMarks += 10;
                     statusText = "<span class='status-correct'>✅ सही (+10)</span>";
@@ -672,16 +767,11 @@
                     statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
                 }
             } else {
-                totalUnanswered++;
-                statusText = "<span style='color:#718096; font-weight:bold;'>⚪ अनुत्तरित (0)</span>";
+                totalSkipped++;
+                statusText = "<span class='status-skipped'>⚪ अनुत्तरित / स्किप (0)</span>";
             }
 
-            tableRowsHtml += `
-                <tr>
-                    <td><b>प्रश्न ${index + 1}</b></td>
-                    <td>${statusText}</td>
-                </tr>
-            `;
+            tableRowsHtml += `<tr><td><b>प्रश्न ${index + 1}</b></td><td>${statusText}</td></tr>`;
 
             detailedQuestionLog.push({
                 qNum: index + 1,
@@ -702,61 +792,50 @@
             <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             <div style="text-align: center; margin: 15px 0;">
-                <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong}</span><br>
-                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks} / 100</b></span>
+                <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong} | स्किप: ${totalSkipped}</span><br>
+                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks}</b></span>
             </div>
-            
             <table class="summary-table">
-                <thead>
-                    <tr>
-                        <th>प्रश्न संख्या</th>
-                        <th>स्थिति (Status)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRowsHtml}
-                </tbody>
+                <thead><tr><th>प्रश्न संख्या</th><th>स्थिति (Status)</th></tr></thead>
+                <tbody>${tableRowsHtml}</tbody>
             </table>
         `;
         
-        let isPassed = finalMarks >= 40;
-        if (isPassed) {
-            resultDiv.className = "result correct-bg";
-        } else {
-            resultDiv.className = "result needs-improvement-bg";
-        }
+        let isPassed = finalMarks >= (activeQuestions.length * 10 * 0.4); 
+        resultDiv.className = isPassed ? "result correct-bg" : "result needs-improvement-bg";
         
         const nameInput = document.getElementById('s-name').value;
         const rollInput = document.getElementById('s-roll').value;
         const dateInput = document.getElementById('s-date').value;
-        const pNameInput = document.getElementById('p-name').value || "प्रधानाचार्य";
+        const genderInput = document.getElementById('s-gender').value;
 
         if (isPassed) {
             const certDiv = document.getElementById('certificate-box');
             certDiv.style.display = "block";
+            
+            let signRenderHtml = `<div style="font-family: 'Brush Script MT', cursive; font-size: 20px; color: #2b6cb0; font-weight: bold;">विनोद कुमार सहारण</div>`;
+            if (signImgData !== "") {
+                signRenderHtml = `<img src="${signImgData}" class="uploaded-sign-img" alt="Signature">`;
+            }
+
             certDiv.innerHTML = `
                 <div class="certificate-card">
                     <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
-                    <h4>ज्ञान ज्योति शिक्षण संस्थान ( ऑनलाइन ),सूरतगढ़, श्रीगंगानगर,राजस्थान</h4>
-                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि छात्र/छात्रा</p>
+                    <h4 style="color: #2b6cb0; font-weight: bold;">ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h4>
+                    <p style="font-size:13px; color: #718096; margin-top:-5px;">सूरतगढ़, श्रीगंगानगर, राजस्थान</p>
+                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
                     <div class="cert-name">${nameInput}</div>
-                    <p style="font-size:16px; width:80%; margin: 10px auto; line-height:1.6;">
-                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक <b>${dateInput}</b> को आयोजित डिजिटल एकीकृत मुख्य परीक्षा में 
-                        विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए <b>${finalMarks}/100</b> अंक प्राप्त कर सफलता हासिल की है।
+                    <p style="font-size:16px; width:85%; margin: 10px auto; line-height:1.6;">
+                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक <b>${dateInput}</b> को आयोजित ऑनलाइन मुख्य परीक्षा में 
+                        विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
                     </p>
-                    
                     <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
-                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि: <b>${dateInput}</b></div>
-                        <div style="text-align: center; min-width: 170px; position: relative;">
-                            <div style="font-family: 'Brush Script MT', 'Lucida Handwriting', cursive, sans-serif; font-size: 25px; color: #2b6cb0; font-weight: bold; font-style: italic; transform: rotate(-2deg); margin-bottom: -2px; display: inline-block; letter-spacing: 1px;">
-                                ${pNameInput}
-                            </div>
-                            <div style="font-size: 9px; color: #38a169; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px;">
-                                ✓ DIGITALLY SIGNED & VERIFIED
-                            </div>
-                            <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-size: 13px; font-weight: bold; color: #2d3748;">
-                                प्रधानाचार्य हस्ताक्षर
-                            </div>
+                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि:<br><b>${dateInput}</b></div>
+                        <div style="text-align: center; min-width: 180px;">
+                            ${signRenderHtml}
+                            <div style="font-size: 9px; color: #38a169; font-weight: bold; margin-bottom: 3px;">✓ DIGITALLY VERIFIED</div>
+                            <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-size: 13px; font-weight: bold; color: #2d3748;">मार्गदर्शक हस्ताक्षर</div>
+                            <div style="font-size:11px; color:#718096;">(विनोद कुमार सहारण)</div>
                         </div>
                     </div>
                 </div>
@@ -767,56 +846,38 @@
         document.getElementById('header-bar').style.display = "none";
         document.getElementById('print-btn').style.display = "block";
         
-        let grade = "E";
-        if (finalMarks >= 90) grade = "A+";
-        else if (finalMarks >= 80) grade = "A";
-        else if (finalMarks >= 70) grade = "B+";
-        else if (finalMarks >= 60) grade = "B";
-        else if (finalMarks >= 50) grade = "C";
-        else if (finalMarks >= 40) grade = "D";
-
+        let grade = finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
         saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, finalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
     function saveToHistory(name, roll, subject, date, marks, grade, details) {
-        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
         let id = Date.now();
         history.push({ id, name, roll, subject, date, marks, grade, details });
-        localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
+        localStorage.setItem('gjEdu3SubjHistory', JSON.stringify(history));
         loadHistory();
     }
 
     function loadHistory() {
-        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
         const tbody = document.getElementById('history-rows');
         tbody.innerHTML = "";
-        
         if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई पिछला रिकॉर्ड नहीं मिला।</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई रिकॉर्ड मौजूद नहीं है।</td></tr>`;
             return;
         }
-
         let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
         let rankMap = {};
         let currentRank = 1;
         sortedHistory.forEach((item, index) => {
-            if (index > 0 && item.marks < sortedHistory[index - 1].marks) {
-                currentRank = index + 1;
-            }
+            if (index > 0 && item.marks < sortedHistory[index - 1].marks) { currentRank = index + 1; }
             rankMap[item.id] = currentRank;
         });
-
         for (let i = history.length - 1; i >= 0; i--) {
             let item = history[i];
-            let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
             let myRank = rankMap[item.id];
-            
-            let rankBadge = myRank;
-            if (myRank === 1) rankBadge = "🥇 रैंक 1";
-            else if (myRank === 2) rankBadge = "🥈 रैंक 2";
-            else if (myRank === 3) rankBadge = "🥉 रैंक 3";
-
+            let rankBadge = myRank === 1 ? "🥇 1" : myRank === 2 ? "🥈 2" : myRank === 3 ? "🥉 3" : myRank;
             tbody.innerHTML += `
                 <tr>
                     <td><b>${rankBadge}</b></td>
@@ -824,105 +885,66 @@
                     <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
                     <td><b>${item.subject}</b></td>
                     <td>${item.date}</td>
-                    <td><b>${item.marks} / 100</b></td>
-                    <td><span style="font-weight:bold; ${colorStyle}">${item.grade}</span></td>
+                    <td><b>${item.marks}</b></td>
+                    <td><span style="font-weight:bold; color:#2b6cb0;">${item.grade}</span></td>
                 </tr>
             `;
         }
     }
 
     function viewStudentDetails(index) {
-        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
         let student = history[index];
-        
-        if (!student || !student.details) {
-            alert("⚠️ विवरण अनुपलब्ध है।");
-            return;
-        }
-
+        if (!student) return;
         let modal = document.getElementById('details-modal');
         let content = document.getElementById('modal-content');
-        
         let detailRows = "";
         student.details.forEach(d => {
             detailRows += `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="width:10%; padding:8px;"><b>प्रश्न ${d.qNum}</b></td>
+                    <td style="padding:8px;"><b>Q-${d.qNum}</b></td>
                     <td style="text-align:left; font-size:13px; padding:8px;">${d.question}</td>
-                    <td style="width:22%; color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
-                    <td style="width:22%; color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
-                    <td style="width:16%; padding:8px;">${d.status}</td>
+                    <td style="color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
+                    <td style="color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
+                    <td style="padding:8px;">${d.status}</td>
                 </tr>
             `;
         });
-
         content.innerHTML = `
             <div style="margin: 10px 0; font-size: 14px; line-height: 1.6; background:#f7fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
-                👤 <b>नाम:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
-                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>अंक:</b> ${student.marks}/100 (${student.grade})
+                👤 <b>परीक्षार्थी:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
+                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल प्राप्त अंक:</b> ${student.marks}
             </div>
             <table class="summary-table" style="margin-top: 15px; width:100%;">
-                <thead>
-                    <tr style="background:#edf2f7;">
-                        <th>क्र.सं.</th>
-                        <th>पूछा गया प्रश्न</th>
-                        <th>छात्र का उत्तर</th>
-                        <th>सही उत्तर</th>
-                        <th>स्थिति (Status)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${detailRows}
-                </tbody>
+                <thead><tr style="background:#edf2f7;"><th>क्र.सं.</th><th>प्रश्न</th><th>छात्र उत्तर</th><th>सही उत्तर</th><th>स्थिति</th></tr></thead>
+                <tbody>${detailRows}</tbody>
             </table>
         `;
-        
         modal.style.display = "flex";
     }
 
-    function closeModal() {
-        document.getElementById('details-modal').style.display = "none";
-    }
+    function closeModal() { document.getElementById('details-modal').style.display = "none"; }
 
     function downloadExcel() {
-        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
-        if (history.length === 0) {
-            alert("❌ डाउनलोड करने के लिए कोई डेटा नहीं है!");
-            return;
-        }
-
-        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
-        let rankMap = {};
-        let currentRank = 1;
-        sortedHistory.forEach((item, index) => {
-            if (index > 0 && item.marks < sortedHistory[index - 1].marks) {
-                currentRank = index + 1;
-            }
-            rankMap[item.id] = currentRank;
-        });
-
+        let history = JSON.parse(localStorage.getItem('gjEdu3SubjHistory')) || [];
+        if (history.length === 0) { alert("डेटा उपलब्ध नहीं है!"); return; }
         let csvContent = "Rank,Student Name,Roll Number,Subject,Date,Marks Obtained,Grade\n";
-        
-        history.slice().reverse().forEach(item => {
-            let rank = rankMap[item.id];
-            let name = item.name.replace(/,/g, " ");
-            let subject = item.subject.replace(/,/g, " ");
-            csvContent += `${rank},${name},${item.roll},${subject},${item.date},${item.marks},${item.grade}\n`;
+        history.slice().reverse().forEach((item, index) => {
+            csvContent += `${index+1},${item.name},${item.roll},${item.subject},${item.date},${item.marks},${item.grade}\n`;
         });
-
         let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         let url = URL.createObjectURL(blob);
         let link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "Exam_Result_Dashboard.csv");
+        link.setAttribute("download", "Gyan_Jyoti_3Subj_Results.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
 
     function clearHistory() {
-        if(confirm("क्या आप निश्चित रूप से सारा परीक्षा इतिहास डिलीट करना चाहते हैं?")) {
-            localStorage.removeItem('megaSchoolHistory');
+        if(confirm("क्या आप सारा इतिहास डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem('gjEdu3SubjHistory');
             loadHistory();
         }
     }
