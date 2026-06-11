@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>एकीकृत डिजिटल परीक्षा पोर्टल</title>
+    <title>एकीकृत डिजिटल परीक्षा पोर्टल - प्रो</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -20,7 +20,7 @@
             padding: 35px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
             position: relative;
         }
@@ -36,6 +36,17 @@
             margin-bottom: 25px;
             font-size: 15px;
             font-weight: bold;
+        }
+        .rules-tag {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
         }
         
         /* टाइमर और प्रोग्रेस बार */
@@ -54,6 +65,13 @@
             font-size: 18px;
             font-weight: bold;
             color: #dd6b20;
+            margin-bottom: 5px;
+        }
+        .security-badge {
+            text-align: center;
+            font-size: 12px;
+            color: #e53e3e;
+            font-weight: bold;
             margin-bottom: 10px;
         }
         .progress-container {
@@ -123,11 +141,11 @@
         }
         .marks-tag {
             float: right;
-            font-size: 12px;
+            font-size: 11px;
             background: #edf2f7;
             padding: 3px 10px;
             border-radius: 12px;
-            color: #4a5568;
+            color: #c53030;
             font-weight: bold;
         }
         .options-container {
@@ -181,7 +199,6 @@
         #print-btn { background: #38a169; display: none; }
         #print-btn:hover { background: #2f855a; }
         
-        /* छोटा रिपोर्ट कार्ड डिज़ाइन */
         .result {
             margin-top: 25px;
             padding: 20px;
@@ -190,12 +207,11 @@
         .result.correct-bg { background-color: #f0fff4; border: 2px solid #38a169; }
         .result.needs-improvement-bg { background-color: #fffaf0; border: 2px solid #dd6b20; }
         
-        /* समरी टेबल */
         .summary-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            font-size: 15px;
+            font-size: 14px;
             background: white;
         }
         .summary-table th, .summary-table td {
@@ -210,6 +226,21 @@
         .status-correct { color: #38a169; font-weight: bold; }
         .status-wrong { color: #e53e3e; font-weight: bold; }
 
+        /* डिजिटल सर्टिफिकेट डिज़ाइन */
+        .certificate-card {
+            margin-top: 30px;
+            background: #fff;
+            border: 10px double #b7791f;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 28px; margin-top: 0; }
+        .certificate-card h4 { color: #4a5568; letter-spacing: 2px; text-transform: uppercase; margin: 10px 0; }
+        .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
+        
         /* टीचर डैशबोर्ड */
         .dashboard-container {
             margin-top: 40px;
@@ -217,18 +248,18 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            max-width: 700px;
+            max-width: 750px;
             width: 100%;
         }
         .dashboard-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 12px;
-            font-size: 14px;
+            font-size: 13px;
         }
         .dashboard-table th, .dashboard-table td {
             border: 1px solid #e2e8f0;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
         }
         .dashboard-table th {
@@ -241,21 +272,27 @@
             text-decoration: underline;
             cursor: pointer;
         }
-        .roll-link:hover {
-            color: #2b6cb0;
+        .roll-link:hover { color: #2b6cb0; }
+        
+        .action-bar {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
-        .clear-btn {
-            background: #e53e3e;
+        .top-btn {
             color: white;
             border: none;
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 14px;
+            font-size: 13px;
             cursor: pointer;
-            border-radius: 4px;
-            float: right;
+            border-radius: 5px;
+            font-weight: bold;
         }
+        .clear-btn { background: #e53e3e; }
+        .excel-btn { background: #3182ce; }
 
-        /* विस्तृत विवरण पॉप-अप (Modal) स्टाइल */
+        /* पॉप-अप (Modal) स्टाइल */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -272,12 +309,11 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            max-width: 600px;
-            width: 90%;
+            max-width: 700px;
+            width: 95%;
             max-height: 85vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .close-modal {
             position: absolute;
@@ -288,18 +324,15 @@
             cursor: pointer;
             color: #718096;
         }
-        .close-modal:hover {
-            color: #2d3748;
-        }
 
         /* प्रिंट सेटिंग्स */
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .clear-btn, select, #quiz-form, .modal-overlay { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
-            .summary-table { background: white; }
+            .certificate-card { border: 8px double #b7791f; page-break-before: always; }
         }
     </style>
 </head>
@@ -307,10 +340,16 @@
 
 <div class="quiz-container">
     <h1>राजकीय उच्च माध्यमिक विद्यालय, राजस्थान</h1>
-    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल</div>
+    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल (प्रो संस्करण)</div>
+    
+    <div class="rules-tag">
+        ⚠️ नियम: सही उत्तर = +10 अंक | गलत उत्तर = -3 अंक (नेगेटिव मार्किंग) <br>
+        🔒 सुरक्षा प्रणाली चालू है: परीक्षा के दौरान टैब बदलने पर टेस्ट अपने आप रद्द/सबमिट हो जाएगा!
+    </div>
     
     <div class="sticky-header" id="header-bar">
         <div class="timer-box" id="timer-display">⏱️ शेष समय: 20:00 मिनट</div>
+        <div class="security-badge" id="cheat-display">🔒 सुरक्षा स्थिति: सुरक्षित (टैब स्विच काउंट: 0/3)</div>
         <div class="progress-container">
             <div class="progress-bar" id="p-bar"></div>
         </div>
@@ -347,16 +386,24 @@
     <div id="quiz-form" style="display:none;"></div>
     
     <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
+    
     <div id="final-result" class="result" style="display:none;"></div>
-    <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट कार्ड प्रिंट करें</button>
+    
+    <div id="certificate-box" style="display:none;"></div>
+    
+    <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट व सर्टिफिकेट प्रिंट करें</button>
 </div>
 
 <div class="dashboard-container">
-    <button class="clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
-    <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम)</h3>
+    <div class="action-bar">
+        <button class="top-btn excel-btn" onclick="downloadExcel()">📥 Excel डाउनलोड करें</button>
+        <button class="top-btn clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
+    </div>
+    <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम एवं रैंक सूची)</h3>
     <table class="dashboard-table">
         <thead>
             <tr>
+                <th>रैंक (Rank)</th>
                 <th>नाम</th>
                 <th>रोल नंबर (विवरण लिंक)</th>
                 <th>विषय</th>
@@ -372,13 +419,13 @@
 <div class="modal-overlay" id="details-modal">
     <div class="modal-box">
         <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र परीक्षा का विस्तृत विवरण</h3>
+        <h3 style="color:#2b6cb0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 0;">🔍 छात्र परीक्षा की विस्तृत उत्तर कुंजी (Answer Sheet)</h3>
         <div id="modal-content"></div>
     </div>
 </div>
 
 <script>
-    // 📦 इनबिल्ट प्रश्न बैंक
+    // 📦 प्रश्न बैंक
     const masterQuizData = {
         "math": [
             {"question": "5 + 7 × 2 का मान क्या होगा?", "options": ["24", "19", "14", "20"], "answer": "19"},
@@ -423,9 +470,27 @@
     let timeLeft = 1200; 
     let timerInterval;
     let isSubmitted = false;
+    let examActive = false;
+    let cheatCount = 0;
 
     document.getElementById('s-date').valueAsDate = new Date();
     loadHistory();
+
+    // 🔒 एंटी-चीट सुरक्षा प्रणाली का लॉजिक
+    document.addEventListener('visibilitychange', () => {
+        if (examActive && !isSubmitted) {
+            if (document.hidden) {
+                cheatCount++;
+                document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (टैब स्विच काउंट: ${cheatCount}/3)`;
+                if (cheatCount >= 3) {
+                    alert("🚨 सुरक्षा उल्लंघन! आपने 3 बार से अधिक टैब बदलने का प्रयास किया है। आपकी परीक्षा स्वतः ही समाप्त की जा रही है।");
+                    checkAnswers(true);
+                } else {
+                    alert(`⚠️ चेतावनी ${cheatCount}: परीक्षा के दौरान ब्राउज़र टैब न बदलें! 3 चेतावनियों के बाद पेपर लॉक हो जाएगा।`);
+                }
+            }
+        }
+    });
 
     function startExam() {
         const name = document.getElementById('s-name').value.trim();
@@ -450,6 +515,9 @@
         document.getElementById('quiz-form').style.display = "block";
         document.getElementById('submit-btn').style.display = "block";
         
+        examActive = true;
+        cheatCount = 0;
+
         renderQuestions();
         startTimer();
     }
@@ -473,7 +541,7 @@
             });
 
             div.innerHTML = `
-                <span class="marks-tag">10 अंक</span>
+                <span class="marks-tag">सही +10 | गलत -3</span>
                 <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
                 <div class="options-container">
                     ${optionsHtml}
@@ -514,22 +582,35 @@
 
         clearInterval(timerInterval);
         isSubmitted = true;
+        examActive = false;
 
-        let correctAnswersCount = 0;
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let totalUnanswered = 0;
+        let calculatedMarks = 0;
         let tableRowsHtml = ""; 
-        let detailedQuestionLog = []; // प्रत्येक प्रश्न का विस्तृत लॉग सेव करने के लिए array
+        let detailedQuestionLog = []; 
 
         activeQuestions.forEach((item, index) => {
             const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
             
             let statusText = "";
-            let isCorrect = false;
-            if (selectedOpt && selectedOpt.value === item.answer) {
-                correctAnswersCount++;
-                statusText = "<span class='status-correct'>✅ सही</span>";
-                isCorrect = true;
+            let selectedValue = "नहीं दिया";
+            
+            if (selectedOpt) {
+                selectedValue = selectedOpt.value;
+                if (selectedValue === item.answer) {
+                    totalCorrect++;
+                    calculatedMarks += 10;
+                    statusText = "<span class='status-correct'>✅ सही (+10)</span>";
+                } else {
+                    totalWrong++;
+                    calculatedMarks -= 3;
+                    statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
+                }
             } else {
-                statusText = "<span class='status-wrong'>❌ गलत</span>";
+                totalUnanswered++;
+                statusText = "<span style='color:#718096; font-weight:bold;'>⚪ अनुत्तरित (0)</span>";
             }
 
             tableRowsHtml += `
@@ -539,17 +620,20 @@
                 </tr>
             `;
 
-            // हर एक प्रश्न की डिटेल लॉग में जोड़ें
             detailedQuestionLog.push({
                 qNum: index + 1,
                 question: item.question,
+                selected: selectedValue,
+                correct: item.answer,
                 status: statusText
             });
         });
 
-        const totalMarks = correctAnswersCount * 10;
+        // न्यूनतम अंक 0 तय करना
+        let finalMarks = Math.max(0, calculatedMarks);
         document.getElementById('quiz-form').style.display = "none";
 
+        // परिणाम कार्ड दिखाना
         const resultDiv = document.getElementById('final-result');
         resultDiv.style.display = "block";
         
@@ -557,15 +641,15 @@
             <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
             <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
             <div style="text-align: center; margin: 15px 0;">
-                <span style="font-size: 16px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b></span><br>
-                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${totalMarks} / 100</b></span>
+                <span style="font-size: 15px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b> | सही: ${totalCorrect} | गलत: ${totalWrong}</span><br>
+                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${finalMarks} / 100</b></span>
             </div>
             
             <table class="summary-table">
                 <thead>
                     <tr>
                         <th>प्रश्न संख्या</th>
-                        <th>परीक्षा स्थिति (Status)</th>
+                        <th>स्थिति (Status)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -574,36 +658,60 @@
             </table>
         `;
         
-        if (totalMarks >= 40) {
+        let isPassed = finalMarks >= 40;
+        if (isPassed) {
             resultDiv.className = "result correct-bg";
         } else {
             resultDiv.className = "result needs-improvement-bg";
         }
         
+        // 📜 डिजिटल सर्टिफिकेट जेनरेशन (पास होने पर)
+        const nameInput = document.getElementById('s-name').value;
+        const rollInput = document.getElementById('s-roll').value;
+        const dateInput = document.getElementById('s-date').value;
+
+        if (isPassed) {
+            const certDiv = document.getElementById('certificate-box');
+            certDiv.style.display = "block";
+            certDiv.innerHTML = `
+                <div class="certificate-card">
+                    <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
+                    <h4>राजकीय उच्च माध्यमिक विद्यालय, राजस्थान</h4>
+                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि छात्र/छात्रा</p>
+                    <div class="cert-name">${nameInput}</div>
+                    <p style="font-size:16px; width:80%; margin: 10px auto; line-height:1.6;">
+                        अनुक्रमांक <b>${rollInput}</b> ने दिनांक <b>${dateInput}</b> को आयोजित डिजिटल एकीकृत मुख्य परीक्षा में 
+                        विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए <b>${finalMarks}/100</b> अंक प्राप्त कर सफलता हासिल की है।
+                    </p>
+                    <div style="margin-top: 30px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px;">
+                        <div>📆 दिनांक: ${dateInput}</div>
+                        <div style="border-top: 1px solid #2d3748; padding-top: 5px; width: 120px;">✍️ प्रधानाचार्य हस्ताक्षर</div>
+                    </div>
+                </div>
+            `;
+        }
+
         document.getElementById('submit-btn').style.display = "none";
         document.getElementById('header-bar').style.display = "none";
         document.getElementById('print-btn').style.display = "block";
         
-        const nameInput = document.getElementById('s-name').value;
-        const rollInput = document.getElementById('s-roll').value;
-        const dateInput = document.getElementById('s-date').value;
-        
         let grade = "E";
-        if (totalMarks >= 90) grade = "A+";
-        else if (totalMarks >= 80) grade = "A";
-        else if (totalMarks >= 70) grade = "B+";
-        else if (totalMarks >= 60) grade = "B";
-        else if (totalMarks >= 50) grade = "C";
-        else if (totalMarks >= 40) grade = "D";
+        if (finalMarks >= 90) grade = "A+";
+        else if (finalMarks >= 80) grade = "A";
+        else if (finalMarks >= 70) grade = "B+";
+        else if (finalMarks >= 60) grade = "B";
+        else if (finalMarks >= 50) grade = "C";
+        else if (finalMarks >= 40) grade = "D";
 
-        // विस्तृत लॉग के साथ इतिहास सुरक्षित करें
-        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, totalMarks, grade, detailedQuestionLog);
+        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, finalMarks, grade, detailedQuestionLog);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
     }
 
     function saveToHistory(name, roll, subject, date, marks, grade, details) {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
-        history.push({ name, roll, subject, date, marks, grade, details });
+        // प्रत्येक रिकॉर्ड को एक यूनीक आईडी (Timestamp) देना ताकि रैंक सटीक निकले
+        let id = Date.now();
+        history.push({ id, name, roll, subject, date, marks, grade, details });
         localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
         loadHistory();
     }
@@ -614,17 +722,36 @@
         tbody.innerHTML = "";
         
         if(history.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0;">कोई पिछला रिकॉर्ड नहीं मिला।</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#a0aec0;">कोई पिछला रिकॉर्ड नहीं मिला।</td></tr>`;
             return;
         }
 
-        // ताज़ा रिकॉर्ड ऊपर दिखाने के लिए उल्टे क्रम में लूप चलाएं
+        // 📊 डायनामिक रैंक लिस्ट का कैलकुलेशन (Ties को संभालते हुए)
+        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
+        let rankMap = {};
+        let currentRank = 1;
+        sortedHistory.forEach((item, index) => {
+            if (index > 0 && item.marks < sortedHistory[index - 1].marks) {
+                currentRank = index + 1;
+            }
+            rankMap[item.id] = currentRank;
+        });
+
+        // हालिया टेस्ट ऊपर दिखाने के लिए विपरीत क्रम में लूप चलाना
         for (let i = history.length - 1; i >= 0; i--) {
             let item = history[i];
             let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
+            let myRank = rankMap[item.id];
             
+            // टॉपर को चमकाने के लिए मेडल
+            let rankBadge = myRank;
+            if (myRank === 1) rankBadge = "🥇 रैंक 1";
+            else if (myRank === 2) rankBadge = "🥈 रैंक 2";
+            else if (myRank === 3) rankBadge = "🥉 रैंक 3";
+
             tbody.innerHTML += `
                 <tr>
+                    <td><b>${rankBadge}</b></td>
                     <td>${item.name}</td>
                     <td><span class="roll-link" onclick="viewStudentDetails(${i})">${item.roll}</span></td>
                     <td><b>${item.subject}</b></td>
@@ -636,13 +763,13 @@
         }
     }
 
-    // 🔍 रोल नंबर पर क्लिक करने पर विस्तृत विवरण दिखाने का फंक्शन
+    // 🔍 रोल नंबर लिंक पर क्लिक होने का विस्तृत अपडेट
     function viewStudentDetails(index) {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
         let student = history[index];
         
         if (!student || !student.details) {
-            alert("⚠️ इस रिकॉर्ड का विस्तृत विवरण उपलब्ध नहीं है (शायद यह पुराना डेटा है)। कृपया नया टेस्ट सबमिट करें।");
+            alert("⚠️ विवरण अनुपलब्ध है।");
             return;
         }
 
@@ -652,25 +779,29 @@
         let detailRows = "";
         student.details.forEach(d => {
             detailRows += `
-                <tr>
-                    <td style="width:15%"><b>प्रश्न ${d.qNum}</b></td>
-                    <td style="text-align:left; font-size:14px;">${d.question}</td>
-                    <td style="width:20%">${d.status}</td>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="width:10%; padding:8px;"><b>प्रश्न ${d.qNum}</b></td>
+                    <td style="text-align:left; font-size:13px; padding:8px;">${d.question}</td>
+                    <td style="width:22%; color:#2c5282; font-weight:bold; padding:8px;">${d.selected}</td>
+                    <td style="width:22%; color:#2f855a; font-weight:bold; padding:8px;">${d.correct}</td>
+                    <td style="width:16%; padding:8px;">${d.status}</td>
                 </tr>
             `;
         });
 
         content.innerHTML = `
-            <div style="margin: 12px 0; font-size: 15px; line-height: 1.6; background:#f7fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+            <div style="margin: 10px 0; font-size: 14px; line-height: 1.6; background:#f7fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
                 👤 <b>नाम:</b> ${student.name} &nbsp;|&nbsp; 🆔 <b>रोल नंबर:</b> ${student.roll}<br>
-                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>कुल अंक:</b> ${student.marks}/100 (${student.grade})
+                📚 <b>विषय:</b> ${student.subject} &nbsp;|&nbsp; 📊 <b>अंक:</b> ${student.marks}/100 (${student.grade})
             </div>
-            <table class="summary-table" style="margin-top: 15px;">
+            <table class="summary-table" style="margin-top: 15px; width:100%;">
                 <thead>
-                    <tr>
+                    <tr style="background:#edf2f7;">
                         <th>क्र.सं.</th>
                         <th>पूछा गया प्रश्न</th>
-                        <th>स्थिति</th>
+                        <th>छात्र का उत्तर</th>
+                        <th>सही उत्तर</th>
+                        <th>स्थिति (Status)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -684,6 +815,46 @@
 
     function closeModal() {
         document.getElementById('details-modal').style.display = "none";
+    }
+
+    // 📥 Excel/CSV फाइल डाउनलोड फंक्शन
+    function downloadExcel() {
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        if (history.length === 0) {
+            alert("❌ डाउनलोड करने के लिए कोई डेटा नहीं है!");
+            return;
+        }
+
+        let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
+        let rankMap = {};
+        let currentRank = 1;
+        sortedHistory.forEach((item, index) => {
+            if (index > 0 && item.marks < sortedHistory[index - 1].marks) {
+                currentRank = index + 1;
+            }
+            rankMap[item.id] = currentRank;
+        });
+
+        // CSV हेडर तैयार करना
+        let csvContent = "Rank,Student Name,Roll Number,Subject,Date,Marks Obtained,Grade\n";
+        
+        history.slice().reverse().forEach(item => {
+            let rank = rankMap[item.id];
+            // CSV फॉर्मेटिंग को सुरक्षित रखने के लिए कॉमा रिप्लेस करें
+            let name = item.name.replace(/,/g, " ");
+            let subject = item.subject.replace(/,/g, " ");
+            csvContent += `${rank},${name},${item.roll},${subject},${item.date},${item.marks},${item.grade}\n`;
+        });
+
+        // हिंदी फोंट सुरक्षित रखने के लिए UTF-8 BOM जोड़ना
+        let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Exam_Result_Dashboard.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function clearHistory() {
