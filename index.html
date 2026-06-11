@@ -255,7 +255,7 @@
         .status-wrong { color: #e53e3e; font-weight: bold; }
         .status-skipped { color: #dd6b20; font-weight: bold; }
 
-        /* 🏆 सर्टिफिकेट डिज़ाइन और सुरक्षा वॉटरमार्क */
+        /* 🏆 सर्टिफिकेट डिज़ाइन */
         .certificate-card {
             margin-top: 30px;
             background: #fff;
@@ -284,7 +284,7 @@
         .certificate-card h4 { color: #4a5568; letter-spacing: 1px; margin: 10px 0; }
         .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
         
-        /* सर्टिफिकेट पर लाइव फोटो का स्टाइल */
+        /* लाइव फोटो का सर्टिफिकेट पर स्टाइल */
         .cert-student-photo {
             position: absolute;
             top: 25px;
@@ -422,27 +422,16 @@
             to { top: 25px; opacity: 1; }
         }
 
-        /* 🖨️ प्रिंट सेटिंग्स - केवल 1 पेज सर्टिफिकेट और फोटो ही प्रिंट होगा */
+        /* 🖨️ प्रिंट सेटिंग्स */
         @media print {
-            body { 
-                background: white; 
-                padding: 0; 
-                margin: 0; 
-            }
-            .quiz-container { 
-                box-shadow: none; 
-                max-width: 100%; 
-                padding: 0; 
-                border: none;
-            }
+            body { background: white; padding: 0; margin: 0; }
+            .quiz-container { box-shadow: none; max-width: 100%; padding: 0; border: none; }
             h1, .subtitle, .btn, .sticky-header, .dashboard-container, .action-bar, 
             select, #quiz-form, .modal-overlay, .rules-tag, .status-box, 
             .security-lock-overlay, .custom-toast-alert, .student-info, .result { 
                 display: none !important; 
             }
-            #certificate-box {
-                display: block !important;
-            }
+            #certificate-box { display: block !important; }
             .certificate-card { 
                 border: 10px double #b7791f; 
                 background: white !important;
@@ -506,14 +495,14 @@
                 <select id="s-subject"></select>
             </div>
 
-            <!-- 📸 लाइव वेबकैम कैमरा यूआई बॉक्स -->
+            <!-- 📸 सुधरा हुआ लाइव वेबकैम कैमरा यूआई बॉक्स -->
             <div class="info-group" style="grid-column: span 2; text-align: center; margin-top: 10px; background:#edf2f7; padding:15px; border-radius:8px;">
                 <label style="font-size:14px; color:#2b6cb0; margin-bottom:8px;">📸 अनिवार्य लाइव फोटो वेरिफिकेशन (Live Photo Capture):</label>
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <video id="webcam" autoplay playsinline style="width: 140px; height: 165px; background: #000; border-radius: 6px; border: 2px solid #cbd5e0; object-fit: cover;"></video>
+                    <video id="webcam" autoplay playsinline muted style="width: 140px; height: 165px; background: #000; border-radius: 6px; border: 2px solid #cbd5e0; object-fit: cover;"></video>
                     <canvas id="photo-canvas" style="display:none;" width="140" height="165"></canvas>
                     <img id="captured-img" style="display:none; width: 140px; height: 165px; border-radius: 6px; border: 2px solid #38a169; object-fit: cover;">
-                    <button type="button" class="top-btn excel-btn" id="capture-btn" onclick="takeSnapshot()" style="padding: 6px 15px; font-size: 13px; max-width:200px;">📸 फोटो कैप्चर करें</button>
+                    <button type="button" class="top-btn excel-btn" id="capture-btn" onclick="handlePhotoAction()" style="padding: 6px 15px; font-size: 13px; width:200px;">📸 फोटो कैप्चर करें</button>
                 </div>
             </div>
 
@@ -585,7 +574,8 @@
     let cheatCount = 0;
     let selectedSubjectName = "";
     let selectedSubjectCode = "GEN";
-    let capturedPhotoBase64 = ""; // छात्र की लाइव फोटो स्टोर करने के लिए
+    let capturedPhotoBase64 = ""; 
+    let isPhotoCaptured = false; // फोटो स्थिति ट्रैक करने के लिए नई स्टेट वेरिएबल
 
     let dataSubj1 = [];
     let dataSubj2 = [];
@@ -672,41 +662,45 @@
         }
     }
 
-    // 📸 फोटो कैप्चर (स्नैपशॉट) करने का लॉजिक
-    function takeSnapshot() {
+    // 📸 सुधरा हुआ सिंगल स्मार्ट फोटो एक्शन फंक्शन (कैप्चर और रीटेक दोनों के लिए)
+    function handlePhotoAction() {
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('photo-canvas');
         const img = document.getElementById('captured-img');
+        const btn = document.getElementById('capture-btn');
         const ctx = canvas.getContext('2d');
         
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8); // इमेज कंप्रेस करें
-        
-        img.src = capturedPhotoBase64;
-        img.style.display = "block";
-        video.style.display = "none";
-        
-        const btn = document.getElementById('capture-btn');
-        btn.innerText = "🔄 दोबारा फोटो लें";
-        btn.className = "top-btn clear-btn";
-        btn.onclick = resetWebcam;
-    }
-
-    function resetWebcam() {
-        document.getElementById('captured-img').style.display = "none";
-        document.getElementById('webcam').style.display = "block";
-        capturedPhotoBase64 = "";
-        
-        const btn = document.getElementById('capture-btn');
-        btn.innerText = "📸 फोटो कैप्चर करें";
-        btn.className = "top-btn excel-btn";
-        btn.onclick = takeSnapshot;
+        if (!isPhotoCaptured) {
+            // 1. फोटो कैप्चर करें (Snapshot Logic)
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            
+            img.src = capturedPhotoBase64;
+            img.style.display = "block";
+            video.style.display = "none";
+            
+            btn.innerText = "🔄 दोबारा फोटो लें";
+            btn.className = "top-btn clear-btn";
+            isPhotoCaptured = true;
+        } else {
+            // 2. दोबारा कैमरा सक्रिय करें (Reset to Live Webcam)
+            img.style.display = "none";
+            video.style.display = "block";
+            try {
+                video.play(); // पॉज़ होने से बचाने के लिए प्ले कमांड
+            } catch(e){}
+            capturedPhotoBase64 = "";
+            
+            btn.innerText = "📸 फोटो कैप्चर करें";
+            btn.className = "top-btn excel-btn";
+            isPhotoCaptured = false;
+        }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         setupDropdownNames();
         loadAllCSVFilesDirectly(); 
-        initWebcam(); // पेज खुलते ही कैमरा चालू होगा
+        initWebcam(); 
         loadHistory();
     });
 
@@ -818,7 +812,6 @@
             return;
         }
 
-        // 🛑 अनिवार्य लाइव फोटो चेक
         if (!capturedPhotoBase64) {
             alert("⚠️ सुरक्षा नियम: परीक्षा शुरू करने से पहले अपनी 'लाइव फोटो कैप्चर' करना अनिवार्य है!");
             return;
@@ -842,7 +835,6 @@
         timeLeft = totalExamSeconds;
 
         document.documentElement.requestFullscreen().then(() => {
-            // कैमरा स्ट्रीम बंद करें ताकि परीक्षा के दौरान रिसोर्स फ्री रहें
             try {
                 const stream = document.getElementById('webcam').srcObject;
                 if(stream) stream.getTracks().forEach(track => track.stop());
