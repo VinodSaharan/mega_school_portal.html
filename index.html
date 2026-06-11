@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>एकीकृत डिजिटल परीक्षा पोर्टल - प्रो</title>
+    <title>एकीकृत डिजिटल परीक्षा पोर्टल - प्रो (अल्ट्रा सिक्योर)</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -14,6 +14,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* ऑफलाइन नकल रोकने के लिए टेक्स्ट सिलेक्शन बंद */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         .quiz-container {
             background: white;
@@ -340,16 +345,16 @@
 
 <div class="quiz-container">
     <h1>राजकीय उच्च माध्यमिक विद्यालय, राजस्थान</h1>
-    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल (प्रो संस्करण)</div>
+    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल (अल्ट्रा सिक्योर मोड)</div>
     
     <div class="rules-tag">
-        ⚠️ नियम: सही उत्तर = +10 अंक | गलत उत्तर = -3 अंक (नेगेटिव मार्किंग) <br>
-        🔒 सुरक्षा प्रणाली चालू है: परीक्षा के दौरान टैब बदलने पर टेस्ट अपने आप रद्द/सबमिट हो जाएगा!
+        ⚠️ नियम: सही उत्तर = +10 | गलत = -3 अंक | 🔒 ऑफलाइन व ऑनलाइन हाई-सिक्योरिटी लॉक चालू है। <br>
+        (राइट-क्लिक, कॉपी-पेस्ट, फुलस्क्रीन छोड़ना या विंडो बदलना सख्त मना है)
     </div>
     
     <div class="sticky-header" id="header-bar">
         <div class="timer-box" id="timer-display">⏱️ शेष समय: 20:00 मिनट</div>
-        <div class="security-badge" id="cheat-display">🔒 सुरक्षा स्थिति: सुरक्षित (टैब स्विच काउंट: 0/3)</div>
+        <div class="security-badge" id="cheat-display">🛡️ सुरक्षा स्थिति: सुरक्षित (उल्लंघन काउंट: 0/3)</div>
         <div class="progress-container">
             <div class="progress-bar" id="p-bar"></div>
         </div>
@@ -377,6 +382,10 @@
             <div class="info-group">
                 <label>दिनांक (Date):</label>
                 <input type="date" id="s-date">
+            </div>
+            <div class="info-group" style="grid-column: span 2;">
+                <label>प्रधानाचार्य का नाम (डिजिटल हस्ताक्षर हेतु):</label>
+                <input type="text" id="p-name" value="डॉ. आर. के. स्वामी" placeholder="प्रधानाचार्य का नाम दर्ज करें">
             </div>
         </div>
     </div>
@@ -425,7 +434,6 @@
 </div>
 
 <script>
-    // 📦 प्रश्न बैंक
     const masterQuizData = {
         "math": [
             {"question": "5 + 7 × 2 का मान क्या होगा?", "options": ["24", "19", "14", "20"], "answer": "19"},
@@ -476,21 +484,65 @@
     document.getElementById('s-date').valueAsDate = new Date();
     loadHistory();
 
-    // 🔒 एंटी-चीट सुरक्षा प्रणाली का लॉजिक
-    document.addEventListener('visibilitychange', () => {
-        if (examActive && !isSubmitted) {
-            if (document.hidden) {
-                cheatCount++;
-                document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (टैब स्विच काउंट: ${cheatCount}/3)`;
-                if (cheatCount >= 3) {
-                    alert("🚨 सुरक्षा उल्लंघन! आपने 3 बार से अधिक टैब बदलने का प्रयास किया है। आपकी परीक्षा स्वतः ही समाप्त की जा रही है।");
-                    checkAnswers(true);
-                } else {
-                    alert(`⚠️ चेतावनी ${cheatCount}: परीक्षा के दौरान ब्राउज़र टैब न बदलें! 3 चेतावनियों के बाद पेपर लॉक हो जाएगा।`);
-                }
+    // 🔒 [अल्ट्रा-सुरक्षा] राइट क्लिक, कॉपी, कट, पेस्ट पूरी तरह ब्लॉक
+    document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
+    document.addEventListener('paste', e => { if(examActive) e.preventDefault(); });
+
+    // 🔒 [अल्ट्रा-सुरक्षा] इंसपेक्ट एलिमेंट (F12) और सोर्स कोड शॉर्टकट ब्लॉक
+    document.addEventListener('keydown', e => {
+        if (examActive) {
+            if (e.key === "F12" || 
+                (e.ctrlKey && e.shiftKey && e.key === "I") || 
+                (e.ctrlKey && e.key === "u") || 
+                (e.ctrlKey && e.key === "U")) {
+                e.preventDefault();
+                triggerSecurityViolation("सुरक्षित कीबोर्ड शॉर्टकट दबाने का प्रयास किया गया!");
             }
         }
     });
+
+    // 🔒 [अल्ट्रा-सुरक्षा] ऑनलाइन टैब बदलना या ऑफलाइन अन्य सॉफ्टवेयर/नोट्स खोलना डिटेक्ट करना
+    document.addEventListener('visibilitychange', () => {
+        if (examActive && !isSubmitted && document.hidden) {
+            triggerSecurityViolation("ब्राउज़र टैब बदलने का प्रयास किया गया!");
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        if (examActive && !isSubmitted) {
+            triggerSecurityViolation("लोकल सॉफ्टवेयर (MS Word/PDF नोट्स) या बैकग्राउंड ऐप खोलने का प्रयास!");
+        }
+    });
+
+    // 🔒 [अल्ट्रा-सुरक्षा] फुलस्क्रीन से बाहर निकलने पर उल्लंघन दर्ज करना
+    document.addEventListener('fullscreenchange', () => {
+        if (examActive && !document.fullscreenElement && !isSubmitted) {
+            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड से बाहर निकलने का प्रयास!");
+        }
+    });
+
+    function triggerSecurityViolation(reason) {
+        cheatCount++;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/3)`;
+        if (cheatCount >= 3) {
+            alert(`🚨 गंभीर सुरक्षा उल्लंघन!\nकारण: ${reason}\n\nआपकी परीक्षा तुरंत स्वतः समाप्त की जा रही है।`);
+            checkAnswers(true);
+        } else {
+            alert(`⚠️ चेतावनी ${cheatCount}: ${reason}\n\nकृपया परीक्षा स्क्रीन पर ध्यान दें। 3 चेतावनियों के बाद पेपर लॉक हो जाएगा।`);
+            // फुलस्क्रीन दोबारा लागू करने की कोशिश
+            forceFullscreen();
+        }
+    }
+
+    function forceFullscreen() {
+        if (!document.fullscreenElement && examActive) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log("फुलस्क्रीन मोड एक्टिवेट करने में त्रुटि।");
+            });
+        }
+    }
 
     function startExam() {
         const name = document.getElementById('s-name').value.trim();
@@ -498,28 +550,34 @@
         const subjectKey = document.getElementById('s-subject').value;
         
         if (name === "" || roll === "") {
-            alert("⚠️ कृपया परीक्षा शुरू करने से पहले 'नाम' और 'रोल नंबर' जरूर भरें।");
+            alert("⚠️ कृपया परीक्षा शुरू करने से पहले 'नाम' and 'रोल नंबर' जरूर भरें।");
             return;
         }
 
-        activeQuestions = masterQuizData[subjectKey];
-        const subjectTextMap = { "math": "गणित", "hindi": "हिंदी", "science": "विज्ञान" };
-        selectedSubjectName = subjectTextMap[subjectKey];
+        // फुलस्क्रीन एक्टिवेट करना (ऑफलाइन नकल रोकने का सबसे तगड़ा तरीका)
+        document.documentElement.requestFullscreen().then(() => {
+            activeQuestions = masterQuizData[subjectKey];
+            const subjectTextMap = { "math": "गणित", "hindi": "हिंदी", "science": "विज्ञान" };
+            selectedSubjectName = subjectTextMap[subjectKey];
 
-        document.getElementById('s-name').readOnly = true;
-        document.getElementById('s-roll').readOnly = true;
-        document.getElementById('s-subject').disabled = true;
-        document.getElementById('start-btn').style.display = "none";
-        
-        document.getElementById('header-bar').style.display = "block";
-        document.getElementById('quiz-form').style.display = "block";
-        document.getElementById('submit-btn').style.display = "block";
-        
-        examActive = true;
-        cheatCount = 0;
+            document.getElementById('s-name').readOnly = true;
+            document.getElementById('s-roll').readOnly = true;
+            document.getElementById('s-subject').disabled = true;
+            document.getElementById('p-name').readOnly = true;
+            document.getElementById('start-btn').style.display = "none";
+            
+            document.getElementById('header-bar').style.display = "block";
+            document.getElementById('quiz-form').style.display = "block";
+            document.getElementById('submit-btn').style.display = "block";
+            
+            examActive = true;
+            cheatCount = 0;
 
-        renderQuestions();
-        startTimer();
+            renderQuestions();
+            startTimer();
+        }).catch(err => {
+            alert("❌ परीक्षा शुरू करने के लिए फुलस्क्रीन अनुमति आवश्यक है। कृपया दोबारा प्रयास करें।");
+        });
     }
 
     function renderQuestions() {
@@ -584,6 +642,11 @@
         isSubmitted = true;
         examActive = false;
 
+        // फुलस्क्रीन मोड से बाहर आना
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+
         let totalCorrect = 0;
         let totalWrong = 0;
         let totalUnanswered = 0;
@@ -629,11 +692,9 @@
             });
         });
 
-        // न्यूनतम अंक 0 तय करना
         let finalMarks = Math.max(0, calculatedMarks);
         document.getElementById('quiz-form').style.display = "none";
 
-        // परिणाम कार्ड दिखाना
         const resultDiv = document.getElementById('final-result');
         resultDiv.style.display = "block";
         
@@ -665,10 +726,10 @@
             resultDiv.className = "result needs-improvement-bg";
         }
         
-        // 📜 डिजिटल सर्टिफिकेट जेनरेशन (पास होने पर)
         const nameInput = document.getElementById('s-name').value;
         const rollInput = document.getElementById('s-roll').value;
         const dateInput = document.getElementById('s-date').value;
+        const pNameInput = document.getElementById('p-name').value || "प्रधानाचार्य";
 
         if (isPassed) {
             const certDiv = document.getElementById('certificate-box');
@@ -683,9 +744,20 @@
                         अनुक्रमांक <b>${rollInput}</b> ने दिनांक <b>${dateInput}</b> को आयोजित डिजिटल एकीकृत मुख्य परीक्षा में 
                         विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए <b>${finalMarks}/100</b> अंक प्राप्त कर सफलता हासिल की है।
                     </p>
-                    <div style="margin-top: 30px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px;">
-                        <div>📆 दिनांक: ${dateInput}</div>
-                        <div style="border-top: 1px solid #2d3748; padding-top: 5px; width: 120px;">✍️ प्रधानाचार्य हस्ताक्षर</div>
+                    
+                    <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
+                        <div style="text-align: left; color: #4a5568;">📆 जारी तिथि: <b>${dateInput}</b></div>
+                        <div style="text-align: center; min-width: 170px; position: relative;">
+                            <div style="font-family: 'Brush Script MT', 'Lucida Handwriting', cursive, sans-serif; font-size: 25px; color: #2b6cb0; font-weight: bold; font-style: italic; transform: rotate(-2deg); margin-bottom: -2px; display: inline-block; letter-spacing: 1px;">
+                                ${pNameInput}
+                            </div>
+                            <div style="font-size: 9px; color: #38a169; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 3px;">
+                                ✓ DIGITALLY SIGNED & VERIFIED
+                            </div>
+                            <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-size: 13px; font-weight: bold; color: #2d3748;">
+                                प्रधानाचार्य हस्ताक्षर
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -709,7 +781,6 @@
 
     function saveToHistory(name, roll, subject, date, marks, grade, details) {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
-        // प्रत्येक रिकॉर्ड को एक यूनीक आईडी (Timestamp) देना ताकि रैंक सटीक निकले
         let id = Date.now();
         history.push({ id, name, roll, subject, date, marks, grade, details });
         localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
@@ -726,7 +797,6 @@
             return;
         }
 
-        // 📊 डायनामिक रैंक लिस्ट का कैलकुलेशन (Ties को संभालते हुए)
         let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
         let rankMap = {};
         let currentRank = 1;
@@ -737,13 +807,11 @@
             rankMap[item.id] = currentRank;
         });
 
-        // हालिया टेस्ट ऊपर दिखाने के लिए विपरीत क्रम में लूप चलाना
         for (let i = history.length - 1; i >= 0; i--) {
             let item = history[i];
             let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
             let myRank = rankMap[item.id];
             
-            // टॉपर को चमकाने के लिए मेडल
             let rankBadge = myRank;
             if (myRank === 1) rankBadge = "🥇 रैंक 1";
             else if (myRank === 2) rankBadge = "🥈 रैंक 2";
@@ -763,7 +831,6 @@
         }
     }
 
-    // 🔍 रोल नंबर लिंक पर क्लिक होने का विस्तृत अपडेट
     function viewStudentDetails(index) {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
         let student = history[index];
@@ -817,7 +884,6 @@
         document.getElementById('details-modal').style.display = "none";
     }
 
-    // 📥 Excel/CSV फाइल डाउनलोड फंक्शन
     function downloadExcel() {
         let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
         if (history.length === 0) {
@@ -835,18 +901,15 @@
             rankMap[item.id] = currentRank;
         });
 
-        // CSV हेडर तैयार करना
         let csvContent = "Rank,Student Name,Roll Number,Subject,Date,Marks Obtained,Grade\n";
         
         history.slice().reverse().forEach(item => {
             let rank = rankMap[item.id];
-            // CSV फॉर्मेटिंग को सुरक्षित रखने के लिए कॉमा रिप्लेस करें
             let name = item.name.replace(/,/g, " ");
             let subject = item.subject.replace(/,/g, " ");
             csvContent += `${rank},${name},${item.roll},${subject},${item.date},${item.marks},${item.grade}\n`;
         });
 
-        // हिंदी फोंट सुरक्षित रखने के लिए UTF-8 BOM जोड़ना
         let blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         let url = URL.createObjectURL(blob);
         let link = document.createElement("a");
