@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ज्ञान ज्योति शिक्षण संस्थान - ऑटोमैटिक लाइव परीक्षा पोर्टल</title>
-    <!-- कॉन्फेट्टी (सेलिब्रेशन एनिमेशन) लाइब्रेरी -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
@@ -283,20 +282,6 @@
         .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 26px; margin-top: 15px; }
         .certificate-card h4 { color: #4a5568; letter-spacing: 1px; margin: 10px 0; }
         .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
-        
-        /* लाइव फोटो का सर्टिफिकेट पर स्टाइल */
-        .cert-student-photo {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 100px;
-            height: 120px;
-            border: 2px solid #b7791f;
-            border-radius: 4px;
-            object-fit: cover;
-            background: #f7fafc;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
 
         .cert-meta-container {
             display: flex;
@@ -495,17 +480,6 @@
                 <select id="s-subject"></select>
             </div>
 
-            <!-- 📸 सुधरा हुआ लाइव वेबकैम कैमरा यूआई बॉक्स -->
-            <div class="info-group" style="grid-column: span 2; text-align: center; margin-top: 10px; background:#edf2f7; padding:15px; border-radius:8px;">
-                <label style="font-size:14px; color:#2b6cb0; margin-bottom:8px;">📸 अनिवार्य लाइव फोटो वेरिफिकेशन (Live Photo Capture):</label>
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <video id="webcam" autoplay playsinline muted style="width: 140px; height: 165px; background: #000; border-radius: 6px; border: 2px solid #cbd5e0; object-fit: cover;"></video>
-                    <canvas id="photo-canvas" style="display:none;" width="140" height="165"></canvas>
-                    <img id="captured-img" style="display:none; width: 140px; height: 165px; border-radius: 6px; border: 2px solid #38a169; object-fit: cover;">
-                    <button type="button" class="top-btn excel-btn" id="capture-btn" onclick="handlePhotoAction()" style="padding: 6px 15px; font-size: 13px; width:200px;">📸 फोटो कैप्चर करें</button>
-                </div>
-            </div>
-
             <div class="status-box" id="load-status">🔄 सिस्टम डेटा लोड कर रहा है...</div>
         </div>
     </div>
@@ -530,7 +504,6 @@
     </div>
 </div>
 
-<!-- डैशबोर्ड पैनल -->
 <div class="dashboard-container">
     <div class="action-bar">
         <div style="font-size: 14px; font-weight: bold; color:#2b6cb0; margin-right: auto;">📂 डायरेक्ट ऑटो-लोड सक्रिय (maths.csv, science.csv, hindi.csv)</div>
@@ -574,8 +547,6 @@
     let cheatCount = 0;
     let selectedSubjectName = "";
     let selectedSubjectCode = "GEN";
-    let capturedPhotoBase64 = ""; 
-    let isPhotoCaptured = false; // फोटो स्थिति ट्रैक करने के लिए नई स्टेट वेरिएबल
 
     let dataSubj1 = [];
     let dataSubj2 = [];
@@ -651,56 +622,9 @@
         }
     }
 
-    // 🎥 वेबकैम चालू करने का फंक्शन
-    async function initWebcam() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 140, height: 165 } });
-            document.getElementById('webcam').srcObject = stream;
-        } catch (err) {
-            console.error("Webcam error:", err);
-            document.getElementById('load-status').innerHTML = "⚠️ कैमरा अनुमति नहीं मिली! कृपया कैमरा एक्सेस चालू करें।";
-        }
-    }
-
-    // 📸 सुधरा हुआ सिंगल स्मार्ट फोटो एक्शन फंक्शन (कैप्चर और रीटेक दोनों के लिए)
-    function handlePhotoAction() {
-        const video = document.getElementById('webcam');
-        const canvas = document.getElementById('photo-canvas');
-        const img = document.getElementById('captured-img');
-        const btn = document.getElementById('capture-btn');
-        const ctx = canvas.getContext('2d');
-        
-        if (!isPhotoCaptured) {
-            // 1. फोटो कैप्चर करें (Snapshot Logic)
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-            
-            img.src = capturedPhotoBase64;
-            img.style.display = "block";
-            video.style.display = "none";
-            
-            btn.innerText = "🔄 दोबारा फोटो लें";
-            btn.className = "top-btn clear-btn";
-            isPhotoCaptured = true;
-        } else {
-            // 2. दोबारा कैमरा सक्रिय करें (Reset to Live Webcam)
-            img.style.display = "none";
-            video.style.display = "block";
-            try {
-                video.play(); // पॉज़ होने से बचाने के लिए प्ले कमांड
-            } catch(e){}
-            capturedPhotoBase64 = "";
-            
-            btn.innerText = "📸 फोटो कैप्चर करें";
-            btn.className = "top-btn excel-btn";
-            isPhotoCaptured = false;
-        }
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
         setupDropdownNames();
         loadAllCSVFilesDirectly(); 
-        initWebcam(); 
         loadHistory();
     });
 
@@ -812,11 +736,6 @@
             return;
         }
 
-        if (!capturedPhotoBase64) {
-            alert("⚠️ सुरक्षा नियम: परीक्षा शुरू करने से पहले अपनी 'लाइव फोटो कैप्चर' करना अनिवार्य है!");
-            return;
-        }
-
         let selectedSourceArray = [];
         if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = "गणित (Mathematics)"; selectedSubjectCode = "MATH"; }
         if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = "विज्ञान (Science)"; selectedSubjectCode = "SCI"; }
@@ -835,11 +754,6 @@
         timeLeft = totalExamSeconds;
 
         document.documentElement.requestFullscreen().then(() => {
-            try {
-                const stream = document.getElementById('webcam').srcObject;
-                if(stream) stream.getTracks().forEach(track => track.stop());
-            } catch(e){}
-
             document.getElementById('s-name').readOnly = true;
             document.getElementById('s-roll').readOnly = true;
             document.getElementById('s-subject').disabled = true;
@@ -1005,15 +919,12 @@
             certDiv.style.display = "block";
             certDiv.innerHTML = `
                 <div class="certificate-card">
-                    <!-- 📸 छात्र की लाइव पासपोर्ट फोटो -->
-                    <img src="${capturedPhotoBase64}" class="cert-student-photo" alt="Student Photo">
-
                     <div style="position: absolute; top: 15px; left: 20px; font-size: 11px; color: #718096; font-weight: bold;">सर्टिफिकेट संख्या: ${uniqueSerial}</div>
                     <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
                     <h4 style="color: #2b6cb0; font-weight: bold;">ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h4>
                     <p style="margin-top:25px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
                     <div class="cert-name">${nameInput}</div>
-                    <p style="font-size:16px; width:75%; margin: 10px auto 15px 20px; text-align:left; line-height:1.6;">
+                    <p style="font-size:16px; width:85%; margin: 15px auto 15px 20px; text-align:left; line-height:1.6;">
                         अनुक्रमांक <b>${rollInput}</b> ने मुख्य परीक्षा में विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
                     </p>
                     
