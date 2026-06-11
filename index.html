@@ -174,7 +174,7 @@
             margin-top: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        #start-btn { background: #3182ce; }
+        #start-btn { background: #3182ce; display: block; }
         #start-btn:hover { background: #2b6cb0; }
         #submit-btn { background: #2b6cb0; display: none; }
         #submit-btn:hover { background: #2c5282; }
@@ -190,7 +190,7 @@
         .result.correct-bg { background-color: #f0fff4; border: 2px solid #38a169; }
         .result.needs-improvement-bg { background-color: #fffaf0; border: 2px solid #dd6b20; }
         
-        /* सही/गलत समरी टेबल */
+        /* समरी टेबल */
         .summary-table {
             width: 100%;
             border-collapse: collapse;
@@ -283,4 +283,298 @@
             </div>
             <div class="info-group">
                 <label>परीक्षा का विषय (Subject):</label>
-                <select id="s-
+                <select id="s-subject">
+                    <option value="math">📐 गणित (Mathematics)</option>
+                    <option value="hindi">📝 हिंदी (Hindi Grammar)</option>
+                    <option value="science">🔬 विज्ञान (Science)</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>दिनांक (Date):</label>
+                <input type="date" id="s-date">
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn" id="start-btn" onclick="startExam()">🔐 परीक्षा शुरू करें (Start Exam)</button>
+    
+    <div id="quiz-form" style="display:none;"></div>
+    
+    <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
+    <div id="final-result" class="result" style="display:none;"></div>
+    <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट कार्ड प्रिंट करें</button>
+</div>
+
+<div class="dashboard-container">
+    <button class="clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
+    <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम)</h3>
+    <table class="dashboard-table">
+        <thead>
+            <tr>
+                <th>नाम</th>
+                <th>रोल नंबर</th>
+                <th>विषय</th>
+                <th>तारीख</th>
+                <th>प्राप्तांक</th>
+                <th>ग्रेड</th>
+            </tr>
+        </thead>
+        <tbody id="history-rows"></tbody>
+    </table>
+</div>
+
+<script>
+    // 📦 इनबिल्ट प्रश्न बैंक
+    const masterQuizData = {
+        "math": [
+            {"question": "5 + 7 × 2 का मान क्या होगा?", "options": ["24", "19", "14", "20"], "answer": "19"},
+            {"question": "सबसे छोटी अभाज्य संख्या (Prime Number) कौन सी है?", "options": ["0", "1", "2", "3"], "answer": "2"},
+            {"question": "एक त्रिभुज (Triangle) के तीनों आंतरिक कोणों का योग कितना होता है?", "options": ["90°", "180°", "360°", "270°"], "answer": "180°"},
+            {"question": "वर्ग (Square) का क्षेत्रफल ज्ञात करने का सही सूत्र क्या है?", "options": ["भुजा × भुजा", "2 × भुजा", "लंबाई × चौड़ाई", "भुजा × 4"], "answer": "भुजा × भुजा"},
+            {"question": "यदि किसी वृत्त की त्रिज्या (Radius) 7 सेमी है, तो उसका व्यास (Diameter) क्या होगा?", "options": ["14 सेमी", "21 सेमी", "28 सेमी", "3.5 सेमी"], "answer": "14 सेमी"},
+            {"question": "100 का 25% कितना होगा?", "options": ["10", "25", "50", "75"], "answer": "25"},
+            {"question": "संख्या 45 में अंक '4' का स्थानीय मान (Place Value) क्या है?", "options": ["4", "40", "400", "45"], "answer": "40"},
+            {"question": "आयत (Rectangle) का परिमाप (Perimeter) ज्ञात करने का सूत्र क्या है?", "options": ["2 × (लंबाई + चौड़ाई)", "लंबाई × चौड़ाई", "4 × भुजा", "लंबाई + चौड़ाई"], "answer": "2 × (लंबाई + चौड़ाई)"},
+            {"question": "-5 और +8 का योग (जोड़) कितना होगा?", "options": ["-13", "+3", "-3", "+13"], "answer": "+3"},
+            {"question": "1/2 और 1/4 को जोड़ने पर क्या प्राप्त होगा?", "options": ["2/6", "3/4", "1/6", "2/4"], "answer": "3/4"}
+        ],
+        "hindi": [
+            {"question": "'अमृत' का सही विलोम शब्द क्या होगा?", "options": ["पियूष", "विष", "जल", "सुधा"], "answer": "विष"},
+            {"question": "'सूरज' का पर्यायवाची शब्द निम्नलिखित में से कौन सा है?", "options": ["निशाकर", "सुधाकर", "सूर्य", "राकेश"], "answer": "सूर्य"},
+            {"question": "निम्नलिखित में से शुद्ध वर्तनी (सही शब्द) चुनिए:", "options": ["कवीत्री", "कवयित्री", "कवित्री", "कवीयित्री"], "answer": "कवयित्री"},
+            {"question": "'अंगूठा दिखाना' मुहावरे का सही अर्थ क्या है?", "options": ["मदद करना", "साफ़ मना करना", "चिढ़ाना", "आदर करना"], "answer": "साफ़ मना करना"},
+            {"question": "संज्ञा के स्थान पर प्रयुक्त होने वाले शब्दों को क्या कहते हैं?", "options": ["सर्वनाम", "विशेषण", "क्रिया", "अव्यय"], "answer": "सर्वनाम"},
+            {"question": "'हिमालय' शब्द का सही संधि-विच्छेद क्या होगा?", "options": ["हिम + आलय", "हिमा + लय", "हि + मालय", "हिम + लय"], "answer": "हिम + आलय"},
+            {"question": "हिंदी भाषा को किस लिपि में लिखा जाता है?", "options": ["रोमन", "गुरुमुखी", "देवनागरी", "फारसी"], "answer": "देवनागरी"},
+            {"question": "'लड़का' शब्द का सही बहुवचन रूप क्या होगा?", "options": ["लड़कों", "लड़के", "लड़कियाँ", "लड़कें"], "answer": "लड़के"},
+            {"question": "जो सब कुछ जानता हो, वाक्यांश के लिए एक शब्द क्या होगा?", "options": ["अल्पज्ञ", "सर्वज्ञ", "विद्वान", "अज्ञानी"], "answer": "सर्वज्ञ"},
+            {"question": "'रात' शब्द का तत्सम रूप क्या होगा?", "options": ["रात्रि", "निशा", "अंधकार", "सांझ"], "answer": "रात्रि"}
+        ],
+        "science": [
+            {"question": "मानव आँख की रेटिना पर बनने वाला प्रतिबिंब (Image) कैसा होता है?", "options": ["वास्तविक और उल्टा", "आभासी और सीधा", "वास्तविक और सीधा", "आभासी और उल्टा"], "answer": "वास्तविक और उल्टा"},
+            {"question": "शुद्ध जल (Pure Water) का pH मान कितना होता है?", "options": ["5", "6", "7", "8"], "answer": "7"},
+            {"question": "मानव शरीर की सबसे लंबी या बड़ी हड्डी कौन सी है?", "options": ["स्टेप्स", "फीमर (जांघ की हड्डी)", "रीढ़ की हड्डी", "हाथ की हड्डी"], "answer": "फीमर (जांघ की हड्डी)"},
+            {"question": "विद्युत धारा (Electric Current) को मापने का मात्रक क्या है?", "options": ["वोल्ट", "वाट", "एम्पियर", "ओम"], "answer": "एम्पियर"},
+            {"question": "पौधों में पत्तियों का हरा रंग निम्नलिखित में से किसके कारण होता है?", "options": ["क्लोरोफिल", "हीमोग्लोबिन", "कैरोटीन", "जाइलम"], "answer": "क्लोरोफिल"},
+            {"question": "हमारे सौरमंडल का सबसे बड़ा ग्रह कौन सा है?", "options": ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], "answer": "बृहस्पति"},
+            {"question": "गुरुत्वाकर्षण का नियम (Law of Gravitation) किस वैज्ञानिक ने दिया था?", "options": ["अल्बर्ट आइंइन", "सर आइजैक न्यूटन", "गैलीलियो", "जॉन डॉल्टन"], "answer": "सर आइजैक न्यूटन"},
+            {"question": "विटामिन सी (Vitamin C) की कमी से कौन सा रोग होता है?", "options": ["रिकेट्स", "रतौंधी", "बेरी-बेरी", "स्कर्वी"], "answer": "स्कर्वी"},
+            {"question": "वायुमंडल में सबसे अधिक मात्रा (78%) में पाई जाने वाली गैस कौन सी है?", "options": ["ऑक्सीजन", "नाइट्रोजन", "कार्बन डाइऑक्साइड", "आर्गन"], "answer": "नाइट्रोजन"},
+            {"question": "पानी (H₂O) में हाइड्रोजन और ऑक्सीजन के परमाणुओं का अनुपात क्या होता है?", "options": ["2:1", "1:2", "8:1", "1:8"], "answer": "2:1"}
+        ]
+    };
+
+    let activeQuestions = [];
+    let selectedSubjectName = "";
+    let timeLeft = 1200; 
+    let timerInterval;
+    let isSubmitted = false;
+
+    document.getElementById('s-date').valueAsDate = new Date();
+    loadHistory();
+
+    function startExam() {
+        const name = document.getElementById('s-name').value.trim();
+        const roll = document.getElementById('s-roll').value.trim();
+        const subjectKey = document.getElementById('s-subject').value;
+        
+        if (name === "" || roll === "") {
+            alert("⚠️ कृपया परीक्षा शुरू करने से पहले 'नाम' और 'रोल नंबर' जरूर भरें।");
+            return;
+        }
+
+        activeQuestions = masterQuizData[subjectKey];
+        const subjectTextMap = { "math": "गणित", "hindi": "हिंदी", "science": "विज्ञान" };
+        selectedSubjectName = subjectTextMap[subjectKey];
+
+        document.getElementById('s-name').readOnly = true;
+        document.getElementById('s-roll').readOnly = true;
+        document.getElementById('s-subject').disabled = true;
+        document.getElementById('start-btn').style.display = "none";
+        
+        document.getElementById('header-bar').style.display = "block";
+        document.getElementById('quiz-form').style.display = "block";
+        document.getElementById('submit-btn').style.display = "block";
+        
+        renderQuestions();
+        startTimer();
+    }
+
+    function renderQuestions() {
+        const quizForm = document.getElementById('quiz-form');
+        quizForm.innerHTML = "";
+        
+        activeQuestions.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'question-block';
+            
+            let optionsHtml = '';
+            item.options.forEach((opt, optIndex) => {
+                optionsHtml += `
+                    <div class="option-item">
+                        <input type="radio" name="q-${index}" id="q-${index}-o-${optIndex}" value="${opt}" onchange="updateProgress()">
+                        <label for="q-${index}-o-${optIndex}">${opt}</label>
+                    </div>
+                `;
+            });
+
+            div.innerHTML = `
+                <span class="marks-tag">10 अंक</span>
+                <div class="question-text">प्रश्न ${index + 1}: ${item.question}</div>
+                <div class="options-container">
+                    ${optionsHtml}
+                </div>
+            `;
+            quizForm.appendChild(div);
+        });
+    }
+
+    function updateProgress() {
+        let filledCount = 0;
+        activeQuestions.forEach((_, index) => {
+            if(document.querySelector(`input[name="q-${index}"]:checked`)) {
+                filledCount++;
+            }
+        });
+        const percentage = (filledCount / activeQuestions.length) * 100;
+        document.getElementById('p-bar').style.width = percentage + "%";
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त हो गया!";
+                if(!isSubmitted) checkAnswers(true);
+            } else {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('timer-display').innerHTML = `⏱️ शेष समय: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} मिनट`;
+            }
+        }, 1000);
+    }
+
+    function checkAnswers(isAutoSubmit) {
+        if(isSubmitted) return;
+
+        clearInterval(timerInterval);
+        isSubmitted = true;
+
+        let correctAnswersCount = 0;
+        let tableRowsHtml = ""; 
+
+        activeQuestions.forEach((item, index) => {
+            const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
+            
+            let statusText = "";
+            if (selectedOpt && selectedOpt.value === item.answer) {
+                correctAnswersCount++;
+                statusText = "<span class='status-correct'>✅ सही</span>";
+            } else {
+                statusText = "<span class='status-wrong'>❌ गलत</span>";
+            }
+
+            tableRowsHtml += `
+                <tr>
+                    <td><b>प्रश्न ${index + 1}</b></td>
+                    <td>${statusText}</td>
+                </tr>
+            `;
+        });
+
+        const totalMarks = correctAnswersCount * 10;
+        document.getElementById('quiz-form').style.display = "none";
+
+        const resultDiv = document.getElementById('final-result');
+        resultDiv.style.display = "block";
+        
+        resultDiv.innerHTML = `
+            <div style="font-size: 18px; text-align: center; font-weight: bold; margin-bottom: 10px;">📋 आधिकारिक परीक्षा परिणाम (Result Card)</div>
+            <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
+            <div style="text-align: center; margin: 15px 0;">
+                <span style="font-size: 16px; color:#4a5568;">विषय: <b>${selectedSubjectName}</b></span><br>
+                <span style="font-size: 26px; color: #2b6cb0;">कुल प्राप्तांक: <b>${totalMarks} / 100</b></span>
+            </div>
+            
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>प्रश्न संख्या</th>
+                        <th>परीक्षा स्थिति (Status)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRowsHtml}
+                </tbody>
+            </table>
+        `;
+        
+        if (totalMarks >= 40) {
+            resultDiv.className = "result correct-bg";
+        } else {
+            resultDiv.className = "result needs-improvement-bg";
+        }
+        
+        document.getElementById('submit-btn').style.display = "none";
+        document.getElementById('header-bar').style.display = "none";
+        document.getElementById('print-btn').style.display = "block";
+        
+        const nameInput = document.getElementById('s-name').value;
+        const rollInput = document.getElementById('s-roll').value;
+        const dateInput = document.getElementById('s-date').value;
+        
+        let grade = "E";
+        if (totalMarks >= 90) grade = "A+";
+        else if (totalMarks >= 80) grade = "A";
+        else if (totalMarks >= 70) grade = "B+";
+        else if (totalMarks >= 60) grade = "B";
+        else if (totalMarks >= 50) grade = "C";
+        else if (totalMarks >= 40) grade = "D";
+
+        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, totalMarks, grade);
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveToHistory(name, roll, subject, date, marks, grade) {
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        history.push({ name, roll, subject, date, marks, grade });
+        localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        const tbody = document.getElementById('history-rows');
+        tbody.innerHTML = "";
+        
+        if(history.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0;">कोई पिछला रिकॉर्ड नहीं मिला।</td></tr>`;
+            return;
+        }
+
+        history.slice().reverse().forEach(item => {
+            let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.roll}</td>
+                    <td><b>${item.subject}</b></td>
+                    <td>${item.date}</td>
+                    <td><b>${item.marks} / 100</b></td>
+                    <td><span style="font-weight:bold; ${colorStyle}">${item.grade}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    function clearHistory() {
+        if(confirm("क्या आप निश्चित रूप से सारा परीक्षा इतिहास डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem('megaSchoolHistory');
+            loadHistory();
+        }
+    }
+</script>
+
+</body>
+</html>
