@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ज्ञान ज्योति शिक्षण संस्थान - ऑटोमैटिक लाइव परीक्षा पोर्टल</title>
+    <!-- कॉन्फेट्टी (सेलिब्रेशन एनिमेशन) लाइब्रेरी -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -253,20 +255,67 @@
         .status-wrong { color: #e53e3e; font-weight: bold; }
         .status-skipped { color: #dd6b20; font-weight: bold; }
 
+        /* 🏆 सर्टिफिकेट डिज़ाइन और सुरक्षा वॉटरमार्क */
         .certificate-card {
             margin-top: 30px;
             background: #fff;
             border: 10px double #b7791f;
-            padding: 30px;
+            padding: 35px;
             text-align: center;
             border-radius: 8px;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 26px; margin-top: 0; }
+        .certificate-card::before {
+            content: "GYAN JYOTI";
+            position: absolute;
+            top: 40%;
+            left: 8%;
+            font-size: 75px;
+            font-weight: 900;
+            color: rgba(183, 121, 31, 0.04);
+            transform: rotate(-25deg);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+        }
+        .certificate-card h2 { color: #b7791f; font-family: 'Georgia', serif; font-size: 26px; margin-top: 15px; }
         .certificate-card h4 { color: #4a5568; letter-spacing: 1px; margin: 10px 0; }
         .cert-name { font-size: 24px; font-weight: bold; color: #2d3748; border-bottom: 2px dashed #cbd5e0; display: inline-block; padding: 0 30px; margin: 15px 0; }
         
+        /* सर्टिफिकेट पर लाइव फोटो का स्टाइल */
+        .cert-student-photo {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 100px;
+            height: 120px;
+            border: 2px solid #b7791f;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #f7fafc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .cert-meta-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 35px;
+            padding: 0 20px;
+            font-size: 13px;
+        }
+        .cert-qr-box {
+            text-align: center;
+        }
+        .cert-qr-box img {
+            width: 85px;
+            height: 85px;
+            border: 1px solid #cbd5e0;
+            padding: 3px;
+            background: white;
+        }
         .uploaded-sign-img {
             max-height: 55px;
             max-width: 160px;
@@ -373,7 +422,7 @@
             to { top: 25px; opacity: 1; }
         }
 
-        /* 🖨️ केवल 1-पेज सर्टिफिकेट प्रिंट करने के लिए स्पेशल प्रिंट सेटिंग्स */
+        /* 🖨️ प्रिंट सेटिंग्स - केवल 1 पेज सर्टिफिकेट और फोटो ही प्रिंट होगा */
         @media print {
             body { 
                 background: white; 
@@ -386,13 +435,11 @@
                 padding: 0; 
                 border: none;
             }
-            /* स्क्रीन के बाकी सभी एलिमेंट्स को प्रिंटआउट से बाहर (Hide) किया गया */
             h1, .subtitle, .btn, .sticky-header, .dashboard-container, .action-bar, 
             select, #quiz-form, .modal-overlay, .rules-tag, .status-box, 
             .security-lock-overlay, .custom-toast-alert, .student-info, .result { 
                 display: none !important; 
             }
-            /* सर्टिफिकेट बॉक्स हमेशा विज़िबल रहेगा और 1 ही पेज पर फिक्स आएगा */
             #certificate-box {
                 display: block !important;
             }
@@ -402,7 +449,12 @@
                 padding: 40px 30px;
                 margin: 10px auto;
                 box-shadow: none;
-                page-break-inside: avoid; /* यह सुनिश्चित करता है कि सर्टिफिकेट टूटकर दूसरे पेज पर न जाए */
+                page-break-inside: avoid;
+            }
+            .certificate-card::before {
+                color: rgba(183, 121, 31, 0.06) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -454,6 +506,17 @@
                 <select id="s-subject"></select>
             </div>
 
+            <!-- 📸 लाइव वेबकैम कैमरा यूआई बॉक्स -->
+            <div class="info-group" style="grid-column: span 2; text-align: center; margin-top: 10px; background:#edf2f7; padding:15px; border-radius:8px;">
+                <label style="font-size:14px; color:#2b6cb0; margin-bottom:8px;">📸 अनिवार्य लाइव फोटो वेरिफिकेशन (Live Photo Capture):</label>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <video id="webcam" autoplay playsinline style="width: 140px; height: 165px; background: #000; border-radius: 6px; border: 2px solid #cbd5e0; object-fit: cover;"></video>
+                    <canvas id="photo-canvas" style="display:none;" width="140" height="165"></canvas>
+                    <img id="captured-img" style="display:none; width: 140px; height: 165px; border-radius: 6px; border: 2px solid #38a169; object-fit: cover;">
+                    <button type="button" class="top-btn excel-btn" id="capture-btn" onclick="takeSnapshot()" style="padding: 6px 15px; font-size: 13px; max-width:200px;">📸 फोटो कैप्चर करें</button>
+                </div>
+            </div>
+
             <div class="status-box" id="load-status">🔄 सिस्टम डेटा लोड कर रहा है...</div>
         </div>
     </div>
@@ -478,6 +541,7 @@
     </div>
 </div>
 
+<!-- डैशबोर्ड पैनल -->
 <div class="dashboard-container">
     <div class="action-bar">
         <div style="font-size: 14px; font-weight: bold; color:#2b6cb0; margin-right: auto;">📂 डायरेक्ट ऑटो-लोड सक्रिय (maths.csv, science.csv, hindi.csv)</div>
@@ -520,6 +584,8 @@
     let examActive = false;
     let cheatCount = 0;
     let selectedSubjectName = "";
+    let selectedSubjectCode = "GEN";
+    let capturedPhotoBase64 = ""; // छात्र की लाइव फोटो स्टोर करने के लिए
 
     let dataSubj1 = [];
     let dataSubj2 = [];
@@ -595,9 +661,52 @@
         }
     }
 
+    // 🎥 वेबकैम चालू करने का फंक्शन
+    async function initWebcam() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 140, height: 165 } });
+            document.getElementById('webcam').srcObject = stream;
+        } catch (err) {
+            console.error("Webcam error:", err);
+            document.getElementById('load-status').innerHTML = "⚠️ कैमरा अनुमति नहीं मिली! कृपया कैमरा एक्सेस चालू करें।";
+        }
+    }
+
+    // 📸 फोटो कैप्चर (स्नैपशॉट) करने का लॉजिक
+    function takeSnapshot() {
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('photo-canvas');
+        const img = document.getElementById('captured-img');
+        const ctx = canvas.getContext('2d');
+        
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.8); // इमेज कंप्रेस करें
+        
+        img.src = capturedPhotoBase64;
+        img.style.display = "block";
+        video.style.display = "none";
+        
+        const btn = document.getElementById('capture-btn');
+        btn.innerText = "🔄 दोबारा फोटो लें";
+        btn.className = "top-btn clear-btn";
+        btn.onclick = resetWebcam;
+    }
+
+    function resetWebcam() {
+        document.getElementById('captured-img').style.display = "none";
+        document.getElementById('webcam').style.display = "block";
+        capturedPhotoBase64 = "";
+        
+        const btn = document.getElementById('capture-btn');
+        btn.innerText = "📸 फोटो कैप्चर करें";
+        btn.className = "top-btn excel-btn";
+        btn.onclick = takeSnapshot;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         setupDropdownNames();
         loadAllCSVFilesDirectly(); 
+        initWebcam(); // पेज खुलते ही कैमरा चालू होगा
         loadHistory();
     });
 
@@ -709,10 +818,16 @@
             return;
         }
 
+        // 🛑 अनिवार्य लाइव फोटो चेक
+        if (!capturedPhotoBase64) {
+            alert("⚠️ सुरक्षा नियम: परीक्षा शुरू करने से पहले अपनी 'लाइव फोटो कैप्चर' करना अनिवार्य है!");
+            return;
+        }
+
         let selectedSourceArray = [];
-        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = "गणित (Mathematics)"; }
-        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = "विज्ञान (Science)"; }
-        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = "हिंदी (Hindi)"; }
+        if (subjectSlot === "1") { selectedSourceArray = dataSubj1; selectedSubjectName = "गणित (Mathematics)"; selectedSubjectCode = "MATH"; }
+        if (subjectSlot === "2") { selectedSourceArray = dataSubj2; selectedSubjectName = "विज्ञान (Science)"; selectedSubjectCode = "SCI"; }
+        if (subjectSlot === "3") { selectedSourceArray = dataSubj3; selectedSubjectName = "हिंदी (Hindi)"; selectedSubjectCode = "HIND"; }
 
         if(selectedSourceArray.length === 0) {
             alert(`❌ इस विषय की CSV फाइल फोल्डर में नहीं मिली या खाली है!`);
@@ -727,6 +842,12 @@
         timeLeft = totalExamSeconds;
 
         document.documentElement.requestFullscreen().then(() => {
+            // कैमरा स्ट्रीम बंद करें ताकि परीक्षा के दौरान रिसोर्स फ्री रहें
+            try {
+                const stream = document.getElementById('webcam').srcObject;
+                if(stream) stream.getTracks().forEach(track => track.stop());
+            } catch(e){}
+
             document.getElementById('s-name').readOnly = true;
             document.getElementById('s-roll').readOnly = true;
             document.getElementById('s-subject').disabled = true;
@@ -878,21 +999,41 @@
         const rollInput = document.getElementById('s-roll').value;
         const genderInput = document.getElementById('s-gender').value;
 
+        let uniqueSerial = `GJ/${now.getFullYear()}/${selectedSubjectCode}/${Math.floor(1000 + Math.random() * 9000)}`;
+
         if (isPassed) {
+            try {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            } catch(e) {}
+
+            let qrTextStr = `Gyan Jyoti Institution - Student: ${nameInput}, Roll: ${rollInput}, Subject: ${selectedSubjectName}, Marks: ${finalMarks}, SlNo: ${uniqueSerial}`;
+            let secureQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTextStr)}`;
+
             const certDiv = document.getElementById('certificate-box');
             certDiv.style.display = "block";
             certDiv.innerHTML = `
                 <div class="certificate-card">
+                    <!-- 📸 छात्र की लाइव पासपोर्ट फोटो -->
+                    <img src="${capturedPhotoBase64}" class="cert-student-photo" alt="Student Photo">
+
+                    <div style="position: absolute; top: 15px; left: 20px; font-size: 11px; color: #718096; font-weight: bold;">सर्टिफिकेट संख्या: ${uniqueSerial}</div>
                     <h2>🎓 योग्यता प्रमाण पत्र 🎓</h2>
                     <h4 style="color: #2b6cb0; font-weight: bold;">ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h4>
-                    <p style="margin-top:20px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
+                    <p style="margin-top:25px; font-size:16px;">प्रमाणित किया जाता है कि ${genderInput}</p>
                     <div class="cert-name">${nameInput}</div>
-                    <p style="font-size:16px; width:85%; margin: 10px auto; line-height:1.6;">
+                    <p style="font-size:16px; width:75%; margin: 10px auto 15px 20px; text-align:left; line-height:1.6;">
                         अनुक्रमांक <b>${rollInput}</b> ने मुख्य परीक्षा में विषय <b>${selectedSubjectName}</b> के अंतर्गत उत्कृष्ट प्रदर्शन करते हुए कुल <b>${finalMarks}</b> अंक प्राप्त कर सफलता हासिल की है।
                     </p>
-                    <div style="margin-top: 35px; display: flex; justify-content: space-between; padding: 0 40px; font-size:14px; align-items: flex-end;">
+                    
+                    <div class="cert-meta-container">
                         <div>📆 जारी तिथि:<br><b>${currentLiveExamDateTime}</b></div>
-                        <div style="text-align: center; min-width: 180px;">
+                        
+                        <div class="cert-qr-box">
+                            <img src="${secureQrUrl}" alt="QR Code">
+                            <div style="font-size: 9px; font-weight: bold; color: #4a5568; margin-top:3px;">🔒 स्कैन सत्यापित</div>
+                        </div>
+
+                        <div style="text-align: center; min-width: 160px;">
                             <img src="${SIGNATURE_URL}" class="uploaded-sign-img" onerror="this.style.display='none';">
                             <div style="font-size: 9px; color: #38a169; font-weight: bold;">✓ DIGITALLY VERIFIED</div>
                             <div style="border-top: 1px solid #b7791f; padding-top: 5px; font-weight: bold;">मार्गदर्शक हस्ताक्षर</div>
@@ -900,11 +1041,20 @@
                     </div>
                 </div>
             `;
+            document.getElementById('print-btn').style.display = "block";
+        } else {
+            const certDiv = document.getElementById('certificate-box');
+            certDiv.style.display = "block";
+            certDiv.innerHTML = `
+                <div style="margin-top:20px; padding:15px; border-radius:8px; background:#fff5f5; border:1px solid #fed7d7; text-align:center; color:#c53030; font-weight:bold;">
+                    📢 प्रमाण पत्र केवल न्यूनतम 40% अंक प्राप्त करने वाले योग्य छात्रों को ही जारी किया जाता है। कृपया अगली बार बेहतर प्रयास करें! 👍
+                </div>
+            `;
+            document.getElementById('print-btn').style.display = "none";
         }
 
         document.getElementById('submit-btn').style.display = "none";
         document.getElementById('header-bar').style.display = "none";
-        document.getElementById('print-btn').style.display = "block";
         
         let grade = cheatCount >= 5 ? "FAIL (SUSPENDED)" : finalMarks >= 80 ? "A" : finalMarks >= 60 ? "B" : finalMarks >= 40 ? "C" : "D";
         saveToHistory(nameInput, rollInput, selectedSubjectName, currentLiveExamDateTime, finalMarks, grade, detailedQuestionLog);
