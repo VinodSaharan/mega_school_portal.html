@@ -352,10 +352,22 @@
         }
         .lock-btn:hover { background: #c53030; }
 
+        /* 🍞 कस्टम फ्लोटिंग टोस्ट अलर्ट (यह ब्राउज़र फोकस नहीं हटाता) */
+        .custom-toast-alert {
+            position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
+            background: #e53e3e; color: white; padding: 16px 28px; border-radius: 8px;
+            font-weight: bold; font-size: 15px; z-index: 110000; box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: none; animation: slideDownIn 0.3s ease-out; text-align: center; line-height: 1.5;
+        }
+        @keyframes slideDownIn {
+            from { top: -60px; opacity: 0; }
+            to { top: 25px; opacity: 1; }
+        }
+
         @media print {
             body { background: white; padding: 0; }
             .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box, .security-lock-overlay { display: none !important; }
+            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box, .security-lock-overlay, .custom-toast-alert { display: none !important; }
             .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
             .result { border: 1px solid #cbd5e0; background: white !important; }
             .certificate-card { border: 8px double #b7791f; page-break-before: always; }
@@ -363,6 +375,8 @@
     </style>
 </head>
 <body>
+
+<div class="custom-toast-alert" id="toast-alert"></div>
 
 <div class="quiz-container">
     <h1>ज्ञान ज्योति शिक्षण संस्थान (ऑनलाइन)</h1>
@@ -421,7 +435,6 @@
     <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट व सर्टिफिकेट प्रिंट करें</button>
 </div>
 
-<!-- 🚨 नई सुरक्षा लॉक स्क्रीन संरचना -->
 <div class="security-lock-overlay" id="security-lock">
     <div class="security-lock-box">
         <h2 style="color: #e53e3e; margin-top: 0;">⚠️ सुरक्षा नियम उल्लंघन! ⚠️</h2>
@@ -474,10 +487,10 @@
     let selectedSubjectName = "";
 
     let dataSubj1 = [
-        { question: "यदि 2x + 5 = 15 है, तो x का मान what होगा?", options: ["3", "5", "7", "10"], answer: "5", time: 45 },
+        { question: "यदि 2x + 5 = 15 है, तो x का मान क्या होगा?", options: ["3", "5", "7", "10"], answer: "5", time: 45 },
         { question: "सबसे छोटी अभाज्य संख्या (Prime Number) कौन सी है?", options: ["0", "1", "2", "3"], answer: "2", time: 30 },
         { question: "वृत्त के क्षेत्रफल का सही सूत्र क्या है?", options: ["2πr", "πr²", "πr³", "2πr²"], answer: "πr²", time: 45 },
-        { question: "9 का वर्गमूल (Square Root) क्या होगा?", options: ["3", "18", "81", "1"], answer: "3", time: 30 },
+        { question: "9 का वर्गमूल (Square Root) what होगा?", options: ["3", "18", "81", "1"], answer: "3", time: 30 },
         { question: "त्रिभुज के तीनों आंतरिक कोणों का योग कितना होता है?", options: ["90°", "180°", "270°", "360°"], answer: "180°", time: 30 },
         { question: "समकोण (Right Angle) कितने डिग्री का होता है?", options: ["45°", "60°", "90°", "120°"], answer: "90°", time: 30 },
         { question: "संख्या 25 का वर्ग (Square) क्या होगा?", options: ["50", "125", "225", "625"], answer: "625", time: 45 },
@@ -512,6 +525,23 @@
         { question: "जो सब कुछ जानता हो, वाक्यांश के लिए एक शब्द क्या होगा?", options: ["अल्पज्ञ", "सर्वज्ञ", "विद्वान", "बुद्धिमान"], answer: "सर्वज्ञ", time: 30 }
     ];
 
+    // 🔄 डेटा रिकवरी फंक्शन जो पुराना और नया दोनों स्टोरेज चेक करता है ताकि रिकॉर्ड गायब न हो
+    function getStoredHistory() {
+        let oldHistory = localStorage.getItem('gjEduLiveTimeHistory');
+        let newHistory = localStorage.getItem('gyanJyotiExamHistory');
+        let parsedOld = oldHistory ? JSON.parse(oldHistory) : [];
+        let parsedNew = newHistory ? JSON.parse(newHistory) : [];
+        
+        // दोनों इतिहास को एक साथ मर्ज कर दें
+        let combined = [...parsedNew];
+        parsedOld.forEach(oldItem => {
+            if(!combined.some(newItem => newItem.id === oldItem.id)) {
+                combined.push(oldItem);
+            }
+        });
+        return combined;
+    }
+
     loadHistory();
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -533,14 +563,14 @@
         statusBox.style.background = "#f0fff4";
         statusBox.style.color = "#22543d";
         statusBox.style.border = "1px solid #c6f6d5";
-        statusBox.innerHTML = "✅ मजबूत सुरक्षा परत (Anti-Cheat Security Pack) लोड हो चुका है। परीक्षा पूर्णतः सुरक्षित वातावरण में होगी।";
+        statusBox.innerHTML = "✅ मजबूत सुरक्षा परत (Anti-Cheat Focus Pack) लोड हो चुका है। परीक्षा पूर्णतः सुरक्षित वातावरण में होगी।";
         
         const startBtn = document.getElementById('start-btn');
         startBtn.disabled = false;
         startBtn.innerHTML = "🔐 परीक्षा शुरू करें (Start Exam)";
     }
 
-    // 🔒 लोहे जैसी मजबूत एंटी-चीट सुरक्षा स्क्रिप्ट्स
+    // 🔒 मजबूत और स्थिर एंटी-चीट सुरक्षा स्क्रिप्ट्स (Focus-Safe)
     document.addEventListener('contextmenu', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('copy', e => { if(examActive) e.preventDefault(); });
     document.addEventListener('cut', e => { if(examActive) e.preventDefault(); });
@@ -550,48 +580,51 @@
 
     document.addEventListener('keydown', e => {
         if (examActive) {
-            // F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+A को पूरी तरह ब्लॉक किया
             if (e.key === "F12" || 
                 (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) || 
                 (e.ctrlKey && (e.key === "U" || e.key === "u" || e.key === "S" || e.key === "s" || e.key === "P" || e.key === "p" || e.key === "A" || e.key === "a"))) {
                 e.preventDefault();
-                triggerSecurityViolation("प्रतिबंधित कीबोर्ड शॉर्टकट का उपयोग ब्लॉक किया गया!");
+                triggerSecurityViolation("प्रतिबंधित कीबोर्ड शॉर्टकट ब्लॉक किया गया!");
             }
         }
     });
 
     document.addEventListener('visibilitychange', () => {
         if (examActive && !isSubmitted && document.hidden) {
-            triggerSecurityViolation("ब्राउज़र टैब या विंडो बदलने का प्रयास!");
-        }
-    });
-
-    window.addEventListener('blur', () => {
-        if (examActive && !isSubmitted) {
-            triggerSecurityViolation("परीक्षा स्क्रीन से हटने (Alt+Tab / Window Move) का प्रयास!");
+            triggerSecurityViolation("ब्राउज़र टैब बदलने का प्रयास किया गया!");
         }
     });
 
     document.addEventListener('fullscreenchange', () => {
         if (examActive && !document.fullscreenElement && !isSubmitted) {
-            triggerSecurityViolation("अनिवार्य फुलस्क्रीन मोड बंद करने का प्रयास!");
             showSecurityLockScreen();
         }
     });
 
+    // 🍞 नॉन-ब्लॉकिंग फ्लोटिंग टोस्ट अलर्ट फंक्शन (यह ब्राउज़र का फोकस कभी नहीं तोड़ता)
+    function showCustomToast(msg) {
+        const toast = document.getElementById('toast-alert');
+        toast.innerHTML = `⚠️ <b>सुरक्षा चेतावनी:</b> ${msg}`;
+        toast.style.display = "block";
+        setTimeout(() => {
+            toast.style.display = "none";
+        }, 5000);
+    }
+
     function triggerSecurityViolation(reason) {
         if (isSubmitted) return;
         cheatCount++;
-        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्लंघन काउंट: ${cheatCount}/3)`;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/3)`;
         
         if (cheatCount >= 3) {
             clearInterval(timerInterval);
             clearInterval(fullscreenTimeout);
             document.getElementById('security-lock').style.display = "none";
+            document.getElementById('toast-alert').style.display = "none";
             alert(`🚨 गंभीर सुरक्षा उल्लंघन! लगातार 3 चेतावनियों के बाद आपका परीक्षा सत्र स्वतः समाप्त कर दिया गया है।`);
             checkAnswers(true);
         } else {
-            alert(`⚠️ सुरक्षा चेतावनी ${cheatCount}/3:\n${reason}\n\n3 चेतावनियों के बाद आपका पेपर तत्काल ब्लॉक होकर स्वतः जमा हो जाएगा।`);
+            showCustomToast(`${reason} (चेतावनी ${cheatCount}/3)`);
         }
     }
 
@@ -599,6 +632,14 @@
     function showSecurityLockScreen() {
         if (cheatCount >= 3 || isSubmitted) return;
         
+        cheatCount++;
+        document.getElementById('cheat-display').innerHTML = `🚨 सुरक्षा स्थिति: चेतावनी! (उल्ंधन काउंट: ${cheatCount}/3)`;
+        
+        if (cheatCount >= 3) {
+            checkAnswers(true);
+            return;
+        }
+
         const lockOverlay = document.getElementById('security-lock');
         lockOverlay.style.display = "flex";
         
@@ -612,7 +653,6 @@
             if (timeLeftToLock <= 0) {
                 clearInterval(fullscreenTimeout);
                 lockOverlay.style.display = "none";
-                alert("🚨 समय समाप्त! निर्धारित समय में फुलस्क्रीन पर न लौटने के कारण परीक्षा स्वतः सबमिट की जा रही है।");
                 checkAnswers(true);
             }
         }, 1000);
@@ -623,7 +663,7 @@
             clearInterval(fullscreenTimeout);
             document.getElementById('security-lock').style.display = "none";
         }).catch(() => {
-            alert("त्रुटि: कृपया ब्राउज़र को फुलस्क्रीन की अनुमति दें!");
+            showCustomToast("कृपया ब्राउज़र को फुलस्क्रीन करने की अनुमति प्रदान करें!");
         });
     }
 
@@ -745,17 +785,13 @@
             let unansweredQuestions = [];
             activeQuestions.forEach((_, index) => {
                 const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
-                if (!selectedOpt) {
-                    unansweredQuestions.push(index + 1);
-                }
+                if (!selectedOpt) { unansweredQuestions.push(index + 1); }
             });
 
             if (unansweredQuestions.length > 0) {
                 alert(`⚠️ परीक्षा सबमिट नहीं की जा सकती!\n\nआपने प्रश्न संख्या: ${unansweredQuestions.join(', ')} का उत्तर नहीं दिया है।\n\nनियम: कृपया या तो सही उत्तर चुनें या 'E) प्रश्न स्किप करें' विकल्प को चुनें।`);
                 const firstUnansweredBlock = document.getElementsByClassName('question-block')[unansweredQuestions[0] - 1];
-                if (firstUnansweredBlock) {
-                    firstUnansweredBlock.scrollIntoView({ behavior: 'smooth' });
-                }
+                if (firstUnansweredBlock) { firstUnansweredBlock.scrollIntoView({ behavior: 'smooth' }); }
                 return;
             }
         }
@@ -767,6 +803,7 @@
 
         if (document.fullscreenElement) { document.exitFullscreen(); }
         document.getElementById('security-lock').style.display = "none";
+        document.getElementById('toast-alert').style.display = "none";
 
         let now = new Date();
         let day = String(now.getDate()).padStart(2, '0');
@@ -775,62 +812,38 @@
         let hours = now.getHours();
         let minutes = String(now.getMinutes()).padStart(2, '0');
         let ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; 
+        hours = hours % 12; hours = hours ? hours : 12; 
         let hoursStr = String(hours).padStart(2, '0');
         let currentLiveExamDateTime = `${day}/${month}/${year} ${hoursStr}:${minutes} ${ampm}`;
 
-        let totalCorrect = 0;
-        let totalWrong = 0;
-        let totalSkipped = 0;
-        let calculatedMarks = 0;
-        let tableRowsHtml = ""; 
-        let detailedQuestionLog = []; 
+        let totalCorrect = 0; let totalWrong = 0; let totalSkipped = 0; let calculatedMarks = 0;
+        let tableRowsHtml = ""; let detailedQuestionLog = []; 
 
         activeQuestions.forEach((item, index) => {
             const selectedOpt = document.querySelector(`input[name="q-${index}"]:checked`);
-            let statusText = "";
-            let selectedValue = "नहीं दिया";
+            let statusText = ""; let selectedValue = "नहीं दिया";
             
             if (selectedOpt) {
                 selectedValue = selectedOpt.value;
                 if (selectedValue === "__SKIP__") {
-                    totalSkipped++;
-                    statusText = "<span class='status-skipped'>⚪ स्किप किया (0)</span>";
-                    selectedValue = "स्किप (E)";
+                    totalSkipped++; statusText = "<span class='status-skipped'>⚪ स्किप किया (0)</span>"; selectedValue = "स्किप (E)";
                 } else if (selectedValue === item.answer) {
-                    totalCorrect++;
-                    calculatedMarks += 10;
-                    statusText = "<span class='status-correct'>✅ सही (+10)</span>";
+                    totalCorrect++; calculatedMarks += 10; statusText = "<span class='status-correct'>✅ सही (+10)</span>";
                 } else {
-                    totalWrong++;
-                    calculatedMarks -= 3;
-                    statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
+                    totalWrong++; calculatedMarks -= 3; statusText = "<span class='status-wrong'>❌ गलत (-3)</span>";
                 }
             } else {
-                totalSkipped++;
-                statusText = "<span class='status-skipped'>⚪ अनुत्तरित / स्किप (0)</span>";
+                totalSkipped++; statusText = "<span class='status-skipped'>⚪ अनुत्तरित / स्किप (0)</span>";
             }
 
             tableRowsHtml += `<tr><td><b>प्रश्न ${index + 1}</b></td><td>${statusText}</td></tr>`;
-
-            detailedQuestionLog.push({
-                qNum: index + 1,
-                question: item.question,
-                selected: selectedValue,
-                correct: item.answer,
-                status: statusText
-            });
+            detailedQuestionLog.push({ qNum: index + 1, question: item.question, selected: selectedValue, correct: item.answer, status: statusText });
         });
 
-        // यदि सुरक्षा उल्लंघन 3 या उससे अधिक बार हुआ हो तो रिजल्ट में सुरक्षा के कारण 0 अंक कर दिए जाएंगे।
         let finalMarks = Math.max(0, calculatedMarks);
-        if(cheatCount >= 3) {
-            finalMarks = 0;
-        }
+        if(cheatCount >= 3) { finalMarks = 0; }
 
         document.getElementById('quiz-form').style.display = "none";
-
         const resultDiv = document.getElementById('final-result');
         resultDiv.style.display = "block";
         
@@ -859,7 +872,6 @@
         if (isPassed) {
             const certDiv = document.getElementById('certificate-box');
             certDiv.style.display = "block";
-            
             let signRenderHtml = `<img src="${SIGNATURE_URL}" class="uploaded-sign-img" alt="Signature" onerror="this.style.display='none';">`;
 
             certDiv.innerHTML = `
@@ -896,15 +908,15 @@
     }
 
     function saveToHistory(name, roll, subject, datetime, marks, grade, details) {
-        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let history = getStoredHistory();
         let id = Date.now();
         history.push({ id, name, roll, subject, date: datetime, marks, grade, details });
-        localStorage.setItem('gjEduLiveTimeHistory', JSON.stringify(history));
+        localStorage.setItem('gyanJyotiExamHistory', JSON.stringify(history));
         loadHistory();
     }
 
     function loadHistory() {
-        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let history = getStoredHistory();
         const tbody = document.getElementById('history-rows');
         tbody.innerHTML = "";
         if(history.length === 0) {
@@ -912,8 +924,7 @@
             return;
         }
         let sortedHistory = [...history].sort((a, b) => b.marks - a.marks);
-        let rankMap = {};
-        let currentRank = 1;
+        let rankMap = {}; let currentRank = 1;
         sortedHistory.forEach((item, index) => {
             if (index > 0 && item.marks < sortedHistory[index - 1].marks) { currentRank = index + 1; }
             rankMap[item.id] = currentRank;
@@ -937,7 +948,7 @@
     }
 
     function viewStudentDetails(index) {
-        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
+        let history = getStoredHistory();
         let student = history[index];
         if (!student) return;
         let modal = document.getElementById('details-modal');
@@ -971,8 +982,8 @@
     function closeModal() { document.getElementById('details-modal').style.display = "none"; }
 
     function downloadExcel() {
-        let history = JSON.parse(localStorage.getItem('gjEduLiveTimeHistory')) || [];
-        if (history.length === 0) { alert("डेटा उपलब्ध नहीं है!"); return; }
+        let history = getStoredHistory();
+        if (history.length === 0) { alert("डाउनलोड करने के लिए डेटा उपलब्ध नहीं है!"); return; }
         let csvContent = "Rank,Student Name,Roll Number,Subject,Exam Date and Time,Marks Obtained,Grade\n";
         history.slice().reverse().forEach((item, index) => {
             csvContent += `${index+1},${item.name},${item.roll},${item.subject},${item.date},${item.marks},${item.grade}\n`;
@@ -981,7 +992,7 @@
         let url = URL.createObjectURL(blob);
         let link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "Gyan_Jyoti_Proctor_Results.csv");
+        link.setAttribute("download", "Gyan_Jyoti_Final_Results.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -989,6 +1000,7 @@
 
     function clearHistory() {
         if(confirm("क्या आप सारा इतिहास डिलीट करना चाहते हैं?")) {
+            localStorage.removeItem('gyanJyotiExamHistory');
             localStorage.removeItem('gjEduLiveTimeHistory');
             loadHistory();
         }
