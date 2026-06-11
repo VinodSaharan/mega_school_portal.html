@@ -373,13 +373,37 @@
             to { top: 25px; opacity: 1; }
         }
 
+        /* 🖨️ केवल 1-पेज सर्टिफिकेट प्रिंट करने के लिए स्पेशल प्रिंट सेटिंग्स */
         @media print {
-            body { background: white; padding: 0; }
-            .quiz-container { box-shadow: none; max-width: 100%; padding: 0; }
-            .btn, .sticky-header, .dashboard-container, .action-bar, select, #quiz-form, .modal-overlay, .rules-tag, .status-box, .security-lock-overlay, .custom-toast-alert { display: none !important; }
-            .student-info input { border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }
-            .result { border: 1px solid #cbd5e0; background: white !important; }
-            .certificate-card { border: 8px double #b7791f; page-break-before: always; }
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0; 
+            }
+            .quiz-container { 
+                box-shadow: none; 
+                max-width: 100%; 
+                padding: 0; 
+                border: none;
+            }
+            /* स्क्रीन के बाकी सभी एलिमेंट्स को प्रिंटआउट से बाहर (Hide) किया गया */
+            h1, .subtitle, .btn, .sticky-header, .dashboard-container, .action-bar, 
+            select, #quiz-form, .modal-overlay, .rules-tag, .status-box, 
+            .security-lock-overlay, .custom-toast-alert, .student-info, .result { 
+                display: none !important; 
+            }
+            /* सर्टिफिकेट बॉक्स हमेशा विज़िबल रहेगा और 1 ही पेज पर फिक्स आएगा */
+            #certificate-box {
+                display: block !important;
+            }
+            .certificate-card { 
+                border: 10px double #b7791f; 
+                background: white !important;
+                padding: 40px 30px;
+                margin: 10px auto;
+                box-shadow: none;
+                page-break-inside: avoid; /* यह सुनिश्चित करता है कि सर्टिफिकेट टूटकर दूसरे पेज पर न जाए */
+            }
         }
     </style>
 </head>
@@ -752,7 +776,7 @@
             `;
             quizForm.appendChild(div);
         });
-        updateProgress(); // प्रारंभ में 0/10 सेट करने के लिए
+        updateProgress();
     }
 
     function updateProgress() {
@@ -788,7 +812,6 @@
                 if (!document.querySelector(`input[name="q-${index}"]:checked`)) { unansweredQuestions.push(index + 1); }
             });
             if (unansweredQuestions.length > 0) {
-                // यहाँ alert() की जगह कस्टम टोस्ट अलर्ट का उपयोग किया है ताकि फुलस्क्रीन न टूटे और चीट काउंट न बढ़े
                 showCustomToast(`कृपया सभी प्रश्नों के उत्तर दें या 'E) प्रश्न स्किप करें' विकल्प चुनें। (अपूर्ण प्रश्न संख्या: ${unansweredQuestions.join(', ')})`);
                 return;
             }
