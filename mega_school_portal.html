@@ -1,0 +1,614 @@
+import csv
+import random
+import json
+import os
+
+# 🏫 अपने स्कूल का नाम यहाँ बदलें
+SCHOOL_NAME = "राजकीय उच्च माध्यमिक विद्यालय,मानेवाला,सूरतगढ़"
+
+def load_subject_csv(filename, default_subject_name):
+    questions_pool = []
+    
+    # अगर फाइल नहीं है, तो टीचर की मदद के लिए एक सैंपल फाइल ऑटोमैटिक बना दी जाएगी
+    if not os.path.exists(filename):
+        with open(filename, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Question", "Opt1", "Opt2", "Opt3", "Opt4", "Answer"])
+            writer.writerow([f"{default_subject_name} का सैंपल प्रश्न 1?", "विकल्प A", "विकल्प B", "विकल्प C", "विकल्प D", "विकल्प A"])
+            writer.writerow([f"{default_subject_name} का सैंपल प्रश्न 2?", "उत्तर X", "उत्तर Y", "उत्तर Z", "उत्तर W", "उत्तर X"])
+        print(f"📝 आपके लिए '{filename}' का ढांचा तैयार कर दिया गया है। कृपया इसमें अपने प्रश्न बदल लें।")
+
+    # फाइल से प्रश्न पढ़ना
+    with open(filename, mode="r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row.get("Question"): # खाली लाइनों को छोड़ने के लिए
+                questions_pool.append({
+                    "question": row["Question"],
+                    "options": [row["Opt1"], row["Opt2"], row["Opt3"], row["Opt4"]],
+                    "answer": row["Answer"]
+                })
+                
+    return questions_pool
+
+def build_mega_portal():
+    # तीनों CSV फाइलों से प्रश्न लोड करना
+    math_pool = load_subject_csv("math_questions.csv", "गणित")
+    hindi_pool = load_subject_csv("hindi_questions.csv", "हिंदी")
+    science_pool = load_subject_csv("science_questions.csv", "विज्ञान")
+    
+    # हर विषय से 10 रैंडम प्रश्न चुनना (सुरक्षा जांच के साथ)
+    master_quiz_data = {
+        "math": random.sample(math_pool, min(len(math_pool), 10)),
+        "hindi": random.sample(hindi_pool, min(len(hindi_pool), 10)),
+        "science": random.sample(science_pool, min(len(science_pool), 10))
+    }
+    
+    master_json = json.dumps(master_quiz_data, ensure_ascii=False)
+
+    # 🎛️ मास्टर HTML टेम्पलेट (एक ही साइट पर सब कुछ)
+    html_template = f"""<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मल्टी-सब्जेक्ट डिजिटल परीक्षा पोर्टल</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #2d3748;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .quiz-container {{
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+        }}
+        h1 {{
+            text-align: center;
+            color: #2b6cb0;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }}
+        .subtitle {{
+            text-align: center;
+            color: #718096;
+            margin-bottom: 25px;
+            font-size: 15px;
+            font-weight: bold;
+        }}
+        
+        /* टाइमर और प्रोग्रेस बार */
+        .sticky-header {{
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            padding: 10px 0;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+            display: none; /* शुरू में छुपा रहेगा */
+        }}
+        .timer-box {{
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #dd6b20;
+            margin-bottom: 10px;
+        }}
+        .progress-container {{
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+        }}
+        .progress-bar {{
+            background: #2b6cb0;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }}
+
+        /* छात्र विवरण फॉर्म */
+        .student-info {{
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }}
+        .student-info h3 {{
+            margin-top: 0;
+            color: #2b6cb0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }}
+        .info-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }}
+        .info-group {{
+            display: flex;
+            flex-direction: column;
+        }}
+        .info-group label {{
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }}
+        .info-group input, .info-group select {{
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }}
+        .fixed-school {{
+            background-color: #e2e8f0;
+            color: #4a5568;
+            cursor: not-allowed;
+            font-weight: bold;
+        }}
+
+        /* प्रश्न ब्लॉक */
+        .question-block {{
+            background: #f8fafc;
+            padding: 20px;
+            margin-bottom: 18px;
+            border-left: 6px solid #2b6cb0;
+            border-radius: 6px;
+        }}
+        .question-text {{
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }}
+        .marks-tag {{
+            float: right;
+            font-size: 12px;
+            background: #edf2f7;
+            padding: 3px 10px;
+            border-radius: 12px;
+            color: #4a5568;
+            font-weight: bold;
+        }}
+        .options-container {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }}
+        .option-item {{
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .option-item:hover {{
+            background: #ebf8ff;
+            border-color: #bee3f8;
+        }}
+        .option-item input[type="radio"] {{
+            margin-right: 12px;
+            transform: scale(1.3);
+            cursor: pointer;
+        }}
+        .option-item label {{
+            cursor: pointer;
+            font-size: 15px;
+            width: 100%;
+        }}
+        .feedback {{
+            margin-top: 10px;
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+        }}
+
+        /* बटन्स */
+        .btn {{
+            display: block;
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }}
+        #start-btn {{ background: #3182ce; }}
+        #start-btn:hover {{ background: #2b6cb0; }}
+        #submit-btn {{ background: #2b6cb0; display: none; }}
+        #submit-btn:hover {{ background: #2c5282; }}
+        #print-btn {{ background: #38a169; display: none; }}
+        #print-btn:hover {{ background: #2f855a; }}
+        
+        /* रिजल्ट कार्ड डिज़ाइन (No Fail - Orange scale fallback) */
+        .result {{
+            margin-top: 25px;
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            padding: 25px;
+            border-radius: 12px;
+            line-height: 1.8;
+        }}
+        .correct {{ color: #38a169; }}
+        .wrong {{ color: #dd6b20; }}
+        
+        .result.correct-bg {{ background-color: #f0fff4; border: 2px solid #38a169; box-shadow: 0 4px 15px rgba(56,161,105,0.15); }}
+        .result.needs-improvement-bg {{ background-color: #fffaf0; border: 2px solid #dd6b20; box-shadow: 0 4px 15px rgba(221,107,32,0.15); }}
+        
+        .grade-badge {{
+            display: inline-block;
+            font-size: 30px;
+            background: #2b6cb0;
+            color: white;
+            padding: 2px 22px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }}
+        .grade-badge.try-again-badge {{
+            background: #dd6b20;
+        }}
+
+        /* टीचर डैशबोर्ड */
+        .dashboard-container {{
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 700px;
+            width: 100%;
+        }}
+        .dashboard-table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 14px;
+        }}
+        .dashboard-table th, .dashboard-table td {{
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }}
+        .dashboard-table th {{
+            background: #edf2f7;
+            color: #4a5568;
+        }}
+        .clear-btn {{
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            float: right;
+        }}
+
+        /* 🖨️ प्रिंट सेटिंग्स */
+        @media print {{
+            body {{ background: white; padding: 0; }}
+            .quiz-container {{ box-shadow: none; max-width: 100%; padding: 0; }}
+            .btn, .sticky-header, .dashboard-container, .clear-btn, .option-item input[type="radio"], select {{ display: none !important; }}
+            .student-info input {{ border: none; background: transparent; font-weight: bold; font-size: 16px; padding: 0; color: black !important; }}
+            .question-block {{ border: 1px solid #e2e8f0; background: white; page-break-inside: avoid; }}
+            .option-item {{ border: none; padding: 4px 0; }}
+        }}
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>🏫 {SCHOOL_NAME}</h1>
+    <div class="subtitle">🎯 डिजिटल एकीकृत मुख्य परीक्षा पोर्टल</div>
+    
+    <div class="sticky-header" id="header-bar">
+        <div class="timer-box" id="timer-display">⏱️ शेष समय: 20:00 मिनट</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="p-bar"></div>
+        </div>
+    </div>
+    
+    <div class="student-info" id="info-card">
+        <h3>📋 परीक्षा फॉर्म (Exam Registration)</h3>
+        <div class="info-grid">
+            <div class="info-group">
+                <label>छात्र/छात्रा का नाम:</label>
+                <input type="text" id="s-name" placeholder="पूरा नाम लिखें">
+            </div>
+            <div class="info-group">
+                <label>अनुक्रमांक (Roll No):</label>
+                <input type="text" id="s-roll" placeholder="रोल नंबर लिखें">
+            </div>
+            <div class="info-group">
+                <label>परीक्षा का विषय (Subject):</label>
+                <select id="s-subject">
+                    <option value="math">📐 गणित (Mathematics)</option>
+                    <option value="hindi">📝 हिंदी (Hindi Grammar)</option>
+                    <option value="science">🔬 विज्ञान (Science)</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>दिनांक (Date):</label>
+                <input type="date" id="s-date">
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn" id="start-btn" onclick="startExam()">🔐 परीक्षा शुरू करें (Start Exam)</button>
+    
+    <div id="quiz-form" style="display:none;"></div>
+    
+    <button class="btn" id="submit-btn" onclick="checkAnswers(false)">🏁 परीक्षा समाप्त करें और अंक देखें</button>
+    <div id="final-result" class="result" style="display:none;"></div>
+    <button class="btn" id="print-btn" onclick="window.print()">🖨️ रिजल्ट कार्ड प्रिंट करें</button>
+</div>
+
+<div class="dashboard-container">
+    <button class="clear-btn" onclick="clearHistory()">डेटा साफ करें</button>
+    <h3>📜 टीचर डैशबोर्ड (एकीकृत परीक्षा परिणाम)</h3>
+    <table class="dashboard-table">
+        <thead>
+            <tr>
+                <th>नाम</th>
+                <th>रोल नंबर</th>
+                <th>विषय</th>
+                <th>तारीख</th>
+                <th>प्राप्तांक</th>
+                <th>ग्रेड</th>
+            </tr>
+        </thead>
+        <tbody id="history-rows"></tbody>
+    </table>
+</div>
+
+<script>
+    // पायथन द्वारा भेजा गया तीनों विषयों का डेटा
+    const masterQuizData = {master_json};
+    let activeQuestions = [];
+    let selectedSubjectName = "";
+    
+    let timeLeft = 1200; // 20 मिनट
+    let timerInterval;
+    let isSubmitted = false;
+
+    document.getElementById('s-date').valueAsDate = new Date();
+    loadHistory();
+
+    function startExam() {{
+        const name = document.getElementById('s-name').value.trim();
+        const roll = document.getElementById('s-roll').value.trim();
+        const subjectKey = document.getElementById('s-subject').value;
+        
+        if (name === "" || roll === "") {{
+            alert("⚠️ कृपया परीक्षा शुरू करने से पहले 'नाम' और 'रोल नंबर' जरूर भरें।");
+            return;
+        }}
+
+        // चुने गए विषय के प्रश्न सेट करना
+        activeQuestions = masterQuizData[subjectKey];
+        const subjectTextMap = {{ "math": "गणित", "hindi": "हिंदी", "science": "विज्ञान" }};
+        selectedSubjectName = subjectTextMap[subjectKey];
+
+        if(activeQuestions.length === 0) {{
+            alert("⚠️ इस विषय की एक्सेल फाइल में कोई प्रश्न नहीं मिला! कृपया फाइल चेक करें।");
+            return;
+        }}
+
+        // UI बदलना (रजिस्ट्रेशन लॉक करना और प्रश्न दिखाना)
+        document.getElementById('s-name').readOnly = true;
+        document.getElementById('s-roll').readOnly = true;
+        document.getElementById('s-subject').disabled = true;
+        document.getElementById('start-btn').style.display = "none";
+        
+        document.getElementById('header-bar').style.display = "block";
+        document.getElementById('quiz-form').style.display = "block";
+        document.getElementById('submit-btn').style.display = "block";
+        
+        renderQuestions();
+        startTimer();
+    }}
+
+    function renderQuestions() {{
+        const quizForm = document.getElementById('quiz-form');
+        quizForm.innerHTML = ""; // साफ करना
+        
+        activeQuestions.forEach((item, index) => {{
+            const div = document.createElement('div');
+            div.className = 'question-block';
+            
+            let optionsHtml = '';
+            item.options.forEach((opt, optIndex) => {{
+                optionsHtml += `
+                    <div class="option-item">
+                        <input type="radio" name="q-${{index}}" id="q-${{index}}-o-${{optIndex}}" value="${{opt}}" onchange="updateProgress()">
+                        <label for="q-${{index}}-o-${{optIndex}}">${{opt}}</label>
+                    </div>
+                `;
+            }});
+
+            div.innerHTML = `
+                <span class="marks-tag">10 अंक</span>
+                <div class="question-text">प्रश्न ${{index + 1}}: ${{item.question}}</div>
+                <div class="options-container">
+                    ${{optionsHtml}}
+                </div>
+                <span id="feedback-${{index}}" class="feedback"></span>
+            `;
+            quizForm.appendChild(div);
+        }});
+    }}
+
+    function updateProgress() {{
+        let filledCount = 0;
+        activeQuestions.forEach((_, index) => {{
+            if(document.querySelector(`input[name="q-${{index}}"]:checked`)) {{
+                filledCount++;
+            }}
+        }});
+        const percentage = (filledCount / activeQuestions.length) * 100;
+        document.getElementById('p-bar').style.width = percentage + "%";
+    }}
+
+    function startTimer() {{
+        timerInterval = setInterval(() => {{
+            if (timeLeft <= 0) {{
+                clearInterval(timerInterval);
+                document.getElementById('timer-display').innerHTML = "🚨 समय समाप्त हो गया!";
+                if(!isSubmitted) checkAnswers(true);
+            }} else {{
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                document.getElementById('timer-display').innerHTML = `⏱️ शेष समय: ${{mins.toString().padStart(2, '0')}}:${{secs.toString().padStart(2, '0')}} मिनट`;
+            }}
+        }}, 1000);
+    }}
+
+    function checkAnswers(isAutoSubmit) {{
+        if(isSubmitted) return;
+
+        clearInterval(timerInterval);
+        isSubmitted = true;
+
+        let correctAnswersCount = 0;
+        activeQuestions.forEach((item, index) => {{
+            const selectedOpt = document.querySelector(`input[name="q-${{index}}"]:checked`);
+            document.querySelectorAll(`input[name="q-${{index}}"]`).forEach(inp => inp.disabled = true);
+            const feedback = document.getElementById(`feedback-${{index}}`);
+            
+            if(!selectedOpt) {{
+                feedback.innerHTML = `⚠️ अनुत्तरित (सही जवाब: ${{item.answer}})`;
+                feedback.className = "feedback wrong";
+                return;
+            }}
+            
+            if (selectedOpt.value === item.answer) {{
+                correctAnswersCount++;
+                feedback.innerHTML = "✅ सही (+10 अंक)";
+                feedback.className = "feedback correct";
+                selectedOpt.parentElement.style.background = "#e6fffa";
+                selectedOpt.parentElement.style.borderColor = "#38a169";
+            }} else {{
+                feedback.innerHTML = `❌ गलत (सही जवाब: ${{item.answer}})`;
+                feedback.className = "feedback wrong";
+                selectedOpt.parentElement.style.background = "#fff5f5";
+                selectedOpt.parentElement.style.borderColor = "#e53e3e";
+            }}
+        }});
+
+        const totalMarks = correctAnswersCount * 10;
+        
+        // 🎖️ एडवांस्ड ग्रेडिंग स्केल (No Fail Concept)
+        let grade = "E";
+        let remarks = "अधिक सुधार की आवश्यकता है (Need more improvement) 📑";
+        let isTopGrade = false;
+        
+        if (totalMarks >= 90) {{ grade = "A+"; remarks = "उत्कृष्ट प्रदर्शन (Outstanding!) 🌟🌟🌟"; isTopGrade = true; }}
+        else if (totalMarks >= 80) {{ grade = "A"; remarks = "बहुत उत्तम प्रदर्शन (Excellent) 🌟🌟"; isTopGrade = true; }}
+        else if (totalMarks >= 70) {{ grade = "B+"; remarks = "उत्तम प्रयास (Very Good) 🌟"; isTopGrade = true; }}
+        else if (totalMarks >= 60) {{ grade = "B"; remarks = "अच्छा प्रदर्शन (Good) 👍"; isTopGrade = true; }}
+        else if (totalMarks >= 50) {{ grade = "C"; remarks = "सामान्य प्रदर्शन (Average - Can do better) 📝"; isTopGrade = true; }}
+        else if (totalMarks >= 40) {{ grade = "D"; remarks = "संतोषजनक प्रदर्शन (Satisfactory) ⚖️"; isTopGrade = true; }}
+
+        const resultDiv = document.getElementById('final-result');
+        resultDiv.style.display = "block";
+        let badgeClass = isTopGrade ? "grade-badge" : "grade-badge try-again-badge";
+        
+        resultDiv.innerHTML = `
+            📋 आधिकारिक परीक्षा परिणाम पत्र (RESULT CARD)<br>
+            <hr style="border: 1px dashed #cbd5e0; margin: 10px 0;">
+            परीक्षा विषय: <b>${{selectedSubjectName}}</b><br>
+            कुल प्राप्तांक: <span style="font-size:24px;">${{totalMarks}} / 100 अंक</span><br>
+            परीक्षा ग्रेड: <span class="${{badgeClass}}">${{grade}}</span><br>
+            टिप्पणी: <b>${{remarks}}</b><br>
+            <small style="font-size:14px; font-weight:normal;">(विवरण: कुल 10 में से ${{correctAnswersCount}} प्रश्न सही हल किए)</small>
+        `;
+        
+        resultDiv.className = isTopGrade ? "result correct correct-bg" : "result wrong needs-improvement-bg";
+        
+        document.getElementById('submit-btn').style.display = "none";
+        document.getElementById('header-bar').style.display = "none";
+        document.getElementById('print-btn').style.display = "block";
+        
+        const nameInput = document.getElementById('s-name').value;
+        const rollInput = document.getElementById('s-roll').value;
+        const dateInput = document.getElementById('s-date').value;
+        
+        saveToHistory(nameInput, rollInput, selectedSubjectName, dateInput, totalMarks, grade);
+        resultDiv.scrollIntoView({{ behavior: 'smooth' }}});
+    }}
+
+    function saveToHistory(name, roll, subject, date, marks, grade) {{
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        history.push({{ name, roll, subject, date, marks, grade }});
+        localStorage.setItem('megaSchoolHistory', JSON.stringify(history));
+        loadHistory();
+    }}
+
+    function loadHistory() {{
+        let history = JSON.parse(localStorage.getItem('megaSchoolHistory')) || [];
+        const tbody = document.getElementById('history-rows');
+        tbody.innerHTML = "";
+        
+        if(history.length === 0) {{
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0;">कोई पिछला रिकॉर्ड नहीं मिला।</td></tr>`;
+            return;
+        }}
+
+        history.reverse().forEach(item => {{
+            let colorStyle = item.grade !== "E" ? "color:#2b6cb0;" : "color:#dd6b20;";
+            tbody.innerHTML += `
+                <tr>
+                    <td>${{item.name}}</td>
+                    <td>${{item.roll}}</td>
+                    <td><b>${{item.subject}}</b></td>
+                    <td>${{item.date}}</td>
+                    <td><b>${{item.marks}} / 100</b></td>
+                    <td><span style="font-weight:bold; ${{colorStyle}}">${{item.grade}}</span></td>
+                </tr>
+            `;
+        }});
+    }}
+
+    function clearHistory() {{
+        if(confirm("क्या आप निश्चित रूप से सारा परीक्षा इतिहास डिलीट करना चाहते हैं?")) {{
+            localStorage.removeItem('megaSchoolHistory');
+            loadHistory();
+        }}
+    }}
+</script>
+
+</body>
+</html>
+"""
+
+    with open("mega_school_portal.html", "w", encoding="utf-8") as file:
+        file.write(html_template)
+    print("\n🎯 कमाल हो गया! 'mega_school_portal.html' वेबसाइट सफलतापूर्वक बन गई है।")
+    print("👉 इसे ओपन करें, छात्र अपना विषय चुनकर लाइव परीक्षा दे सकते हैं।")
+
+if __name__ == "__main__":
+    build_mega_portal()
